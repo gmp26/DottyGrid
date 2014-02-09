@@ -1,0 +1,29 @@
+
+<div>
+  <svg 
+    ng-attr-d3
+    ng-attr-height="{{svgHeight()}}" 
+    ng-attr-width="{{svgWidth()}}"
+    ng-controller="dottyGridController"
+  >
+    <g ng-attr-transform="{{transform()}}">
+      <polygon ng-repeat="p in polygons" class="polygon"
+        ng-attr-points="{{polyPoints(p)}}">
+      </polygon>
+      <g ng-repeat="row in rows" >
+        <line ng-repeat="dot in row" class="circle" ng-click="polyDraw(dot)"
+          ng-attr-x1="{{dot.x}}" 
+          ng-attr-x2="{{dot.x}}" 
+          ng-attr-y1="{{dot.y}}" 
+          ng-attr-y2="{{dot.y}}"
+          ng-attr-stroke="{{dot.fill()}}" 
+        ></line>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<!-- ng-attr-d3on="mousedown" -->
+<!-- ng-mousedown="onPress($event)" -->
+
+<!-- ng-mousedown="startLine(dot)"  -->
