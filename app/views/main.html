@@ -1,17 +1,19 @@
 
 <div>
   <svg 
-    ng-attr-d3
     ng-attr-height="{{svgHeight()}}" 
     ng-attr-width="{{svgWidth()}}"
     ng-controller="dottyGridController"
   >
     <g ng-attr-transform="{{transform()}}">
-      <polygon ng-repeat="p in polygons" class="polygon"
+      <polygon ng-repeat="p in polygons" ng-attr-class="{{polyClass(p)}}" ng-click="polyToggle(p)"
+        ng-attr-points="{{polyPoints(p)}}">
+      </polygon>
+      <polygon ng-repeat="p in visipolys" class="visipoly"
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
       <g ng-repeat="row in rows" >
-        <line ng-repeat="dot in row" class="circle" ng-click="polyDraw(dot)"
+        <line ng-repeat="dot in row" class="circle" ng-dblclick="visiDraw(dot)" ng-click="polyDraw(dot)"
           ng-attr-x1="{{dot.x}}" 
           ng-attr-x2="{{dot.x}}" 
           ng-attr-y1="{{dot.y}}" 

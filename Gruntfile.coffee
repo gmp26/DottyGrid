@@ -336,6 +336,14 @@ module.exports = (grunt) ->
             'generated/*'
           ]
         ]
+      js:
+        files: [
+          expand: true
+          cwd: '<%= yeoman.app %>/scripts'
+          src: 'lib/*.js'
+          dest: '<%= yeoman.tmp %>/scripts'
+          ext: '.js'
+        ]
 
       styles:
         expand: true,
@@ -350,6 +358,8 @@ module.exports = (grunt) ->
         'recess'
 
         'copy:styles'
+
+        'copy:js'
       ]
       test: [
         'lsc'

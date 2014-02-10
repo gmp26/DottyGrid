@@ -93,6 +93,9 @@ angular.module 'dottyGrid' []
     # previously constructed polygons
     $scope.polygons = [{data: []}]
 
+    tracePolygons = ->
+      console.log ($scope.polygons.map (polygon)->polygon.data.length).join " "
+
     $scope.polyDraw = (dot) ->
       polygon = $scope.polygons[*-1]
       if dot.open
@@ -107,14 +110,26 @@ angular.module 'dottyGrid' []
         console.log "close"
       else
         # append dot to current polygon
+        if dot.open
+          return
         polygon.data.push(dot.p)
-        dot.open = true
+        dot.open = $scope.polygons.length
         dot.first = polygon.data.length == 1
         console.log "open"
+      tracePolygons!
 
     $scope.polyPoints = (p) ->
       screenPoints = p.data.map $scope.cr2xy
       (flatten screenPoints).join " "
+
+    $scope.polyClass = (p) ->
+      "polygon " + if p.highlighted then "opaque" else ""
+
+    $scope.polyToggle = (p) -> p.highlighted = !p.highlighted
+
+    $scope.visipolys = [{data: []}]
+
+    $scope.visiDraw = (dot) ->
 
 
   .directive 'd3', <[]> ++ ->
@@ -130,7 +145,20 @@ angular.module 'dottyGrid' []
         # dot = scope.xy2dot p
         # console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 
-      svg.on "mouseover", trace
-      svg.on "mousedown", trace
-      svg.on "mousemove", trace
-      svg.on "mouseup", trace 
+      highlighter = ->
+        p = d3.mouse element.0
+        console.log "polyScope=#{element.scope!$index}"
+        pos = scope.xy2cr p
+        insideList = scope.polygons.filter (poly) ->
+          poly.data.length > 2
+          and VisibilityPolygon.inPolygon pos, poly.data.concat!
+        for poly in insideList
+          poly.highlighted = !poly.highlighted
+        console.log insideList.length
+
+
+
+      # svg.on "mouseover", trace
+      # svg.on "mousedown", highlighter
+      # svg.on "mousemove", trace
+      # svg.on "mouseup", trace 
