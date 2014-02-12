@@ -25,18 +25,18 @@ angular.module 'dottyGrid' []
 
     #
     # The scope model uses column, row coordinates, but the svg element
-    # uses x,y pixel coordinates. 
+    # uses x,y pixel coordinates.
     #
     # Integer r,c values identify a grid dot
-    # Non-integers may be allowed e.g. while tracking a mouse point with a 
+    # Non-integers may be allowed e.g. while tracking a mouse point with a
     # part-formed line.
     #
 
     #
-    # Coordinate transform functions. 
+    # Coordinate transform functions.
     # Lowercase c,r coords may be non-integer
     # Uppercase C,R coords are integers and can index a dot
-    # 
+    #
     # Note that columns and rows are numbered from bottom left!
     #
     $scope.c2x = d3.scale.linear!
@@ -45,7 +45,7 @@ angular.module 'dottyGrid' []
 
     $scope.x2c = $scope.c2x.invert
     $scope.x2C = (x) -> Math.round $scope.x2c x
-    
+
     $scope.r2y = d3.scale.linear!
     .domain [0,rowCount-1]
     .range [rowCount*sep, inset]
@@ -57,11 +57,11 @@ angular.module 'dottyGrid' []
       * $scope.c2x p.0
         $scope.r2y p.1
 
-    $scope.xy2cr = (p) -> 
+    $scope.xy2cr = (p) ->
       * $scope.x2c p.0
         $scope.y2r p.1
 
-    $scope.xy2dot = (p) -> 
+    $scope.xy2dot = (p) ->
       col = $scope.x2C p.0
       row = $scope.y2R p.1
       $scope.rows[row][col]
@@ -102,7 +102,7 @@ angular.module 'dottyGrid' []
         if !dot.first
           return
         # close polygon and save in polygons array
-        if polygon.data.length > 2 
+        if polygon.data.length > 2
           $scope.polygons.push({data: []})
         else
           polygon.data = []
@@ -130,6 +130,21 @@ angular.module 'dottyGrid' []
     $scope.visipolys = [{data: []}]
 
     $scope.visiDraw = (dot) ->
+
+  .controller 'toolsController', <[$scope]> ++ ($scope) ->
+    $scope.tools =
+      * icon: 'pencil'
+        label: 'Line'
+        type: 'primary'
+      * icon: 'pencil-square-o'
+        label: 'Polygon'
+        type: 'success'
+      * icon: 'sun-o'
+        label: 'Camera'
+        type: 'info'
+      * icon: 'times'
+        label: 'Delete'
+        type: 'danger'
 
 
   .directive 'd3', <[]> ++ ->
@@ -161,4 +176,4 @@ angular.module 'dottyGrid' []
       # svg.on "mouseover", trace
       # svg.on "mousedown", highlighter
       # svg.on "mousemove", trace
-      # svg.on "mouseup", trace 
+      # svg.on "mouseup", trace

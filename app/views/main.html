@@ -1,9 +1,16 @@
 
-<div>
-  <svg 
-    ng-attr-height="{{svgHeight()}}" 
-    ng-attr-width="{{svgWidth()}}"
+  <div ng-controller="toolsController" class="toolControls">
+    <div class="btn-group-vertical">
+      <button class="btn btn-{{tool.type}} btn-lg" ng-repeat="tool in tools">
+        <i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
+      </button>
+    </div>
+  </div>
+  <svg
+    class="dotty-grid"
     ng-controller="dottyGridController"
+    ng-attr-height="{{svgHeight()}}"
+    ng-attr-width="{{svgWidth()}}"
   >
     <g ng-attr-transform="{{transform()}}">
       <polygon ng-repeat="p in polygons" ng-attr-class="{{polyClass(p)}}" ng-click="polyToggle(p)"
@@ -14,16 +21,19 @@
       </polygon>
       <g ng-repeat="row in rows" >
         <line ng-repeat="dot in row" class="circle" ng-dblclick="visiDraw(dot)" ng-click="polyDraw(dot)"
-          ng-attr-x1="{{dot.x}}" 
-          ng-attr-x2="{{dot.x}}" 
-          ng-attr-y1="{{dot.y}}" 
+          ng-attr-x1="{{dot.x}}"
+          ng-attr-x2="{{dot.x}}"
+          ng-attr-y1="{{dot.y}}"
           ng-attr-y2="{{dot.y}}"
-          ng-attr-stroke="{{dot.fill()}}" 
+          ng-attr-stroke="{{dot.fill()}}"
         ></line>
       </g>
     </g>
   </svg>
 </div>
+
+
+
 
 <!-- ng-attr-d3on="mousedown" -->
 <!-- ng-mousedown="onPress($event)" -->

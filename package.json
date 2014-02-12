@@ -1,6 +1,7 @@
 {
-  "name": "illuminate",
+  "name": "DottyGrid",
   "version": "0.0.0",
+  "repository": "https://github.com/gmp26/DottyGrid.git",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-copy": "~0.4.1",
@@ -31,7 +32,8 @@
     "grunt-google-cdn": "~0.2.0",
     "grunt-ngmin": "~0.0.2",
     "grunt-html2js": "~0.2.3",
-    "time-grunt": "~0.1.0"
+    "time-grunt": "~0.1.0",
+    "grunt-contrib-less": "~0.9.0"
   },
   "engines": {
     "node": ">=0.8.0"
