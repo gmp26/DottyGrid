@@ -1,14 +1,21 @@
+<div ng-controller="dottyGridController">
 
-  <div ng-controller="toolsController" class="toolControls">
-    <div class="btn-group-vertical">
-      <button class="btn btn-{{tool.type}} btn-lg" ng-repeat="tool in tools">
+  <div class="toolControls">
+    <div>
+      <button
+        class="btn btn-{{tool.type}} {{tool.active}}"
+        style="margin-right:10px;"
+        ng-repeat="tool in toolset"
+        ng-click="toolCheck(tool)"
+        ng-disabled="{{!tool.enabled}}">
         <i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
       </button>
     </div>
+
   </div>
+
   <svg
     class="dotty-grid"
-    ng-controller="dottyGridController"
     ng-attr-height="{{svgHeight()}}"
     ng-attr-width="{{svgWidth()}}"
   >
@@ -19,23 +26,16 @@
       <polygon ng-repeat="p in visipolys" class="visipoly"
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
-      <g ng-repeat="row in rows" >
-        <line ng-repeat="dot in row" class="circle" ng-dblclick="visiDraw(dot)" ng-click="polyDraw(dot)"
+      <g ng-repeat="row in grid.rows" >
+        <line ng-repeat="dot in row" ng-dblclick="visiDraw(dot)"  ng-click="dotClick(dot)"
           ng-attr-x1="{{dot.x}}"
           ng-attr-x2="{{dot.x}}"
           ng-attr-y1="{{dot.y}}"
           ng-attr-y2="{{dot.y}}"
-          ng-attr-stroke="{{dot.fill()}}"
+          ng-class="classHash(dot)"
         ></line>
       </g>
     </g>
   </svg>
+
 </div>
-
-
-
-
-<!-- ng-attr-d3on="mousedown" -->
-<!-- ng-mousedown="onPress($event)" -->
-
-<!-- ng-mousedown="startLine(dot)"  -->

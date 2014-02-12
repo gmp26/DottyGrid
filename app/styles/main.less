@@ -12,22 +12,34 @@ body {
 }
 
 svg {
-    background-color: black;
+    background-color: white;
 }
+
+
 .circle {
-    stroke-width:20;
     stroke-linecap:round;
-    radius: 10;
+    opacity:0.5;
+    stroke-width:10;
+    stroke: #888;
 }
 .circle:hover {
-    stroke-width:30;
+    //stroke-width:12;
+    stroke-width: 20;
+    opacity: 1;
+    stroke: black;
     cursor:pointer;
 }
+.circle.lit {
+  stroke: #fa0;
+  stroke-width:20;
+  opacity:1;
+}
+
 
 .polygon {
     fill:red;
     fill-opacity:0.5;
-    stroke:lightblue;
+    stroke: #555;
     stroke-width:3;
 }
 .opaque {
@@ -43,7 +55,6 @@ svg {
 
 .toolControls {
   display:inline-block;
-  vertical-align: top;
 }
 
 .dotty-grid {

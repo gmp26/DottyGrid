@@ -1,23 +1,67 @@
 'use strict'
 
-{flatten} = require 'prelude-ls'
+{flatten, reject} = require 'prelude-ls'
 
 angular.module 'dottyGrid' []
-  .controller 'dottyGridController', <[$scope]> ++ ($scope) ->
+
+  # define the toolset
+  .factory 'toolset', -> [
+    * id: 'line'
+      icon: 'pencil'
+      label: 'Draw line'
+      type: 'primary'
+      enabled: true
+      active: ""
+    * id: 'poly'
+      icon: 'pencil-square-o'
+      label: 'Draw shape'
+      type: 'success'
+      enabled: true
+      active: "btn-lg"
+    * id: 'camera'
+      icon: 'sun-o'
+      label: 'Add camera'
+      type: 'info'
+      enabled: true
+      active: ""
+    * id:'trash'
+      icon: 'trash-o'
+      label: 'Delete Selection'
+      type: 'danger'
+      enabled: true
+      active: ""
+  ]
+
+  .controller 'dottyGridController', <[$scope toolset]> ++ ($scope, toolset) ->
 
     console.log "dottyGridController"
+    $scope.toolset = toolset
+
+    $scope.deleteSelection = ->
+      $scope.polygons = reject (.selected), $scope.polygons
+
+    $scope.currentTool = 'poly'
+
+    $scope.toolCheck = (tool) ->
+      if tool.id == 'trash'
+        $scope.deleteSelection!
+      else
+        for t in $scope.toolset
+          t.active = ""
+          tool.active = "btn-lg"
+          $scope.currentTool = tool.active
 
     $scope.trace = (col, row) ->
       console.log "(#{col}, #{row})"
 
-    colCount = 10
-    rowCount = 10
+    colCount = 50
+    rowCount = 50
 
     # Pixels from centre of an edge dot to the svg container boundary
     inset = 20
 
     # Dot separation in pixels
-    sep = 50
+    sep = 18
     scale = 1
 
     $scope.transform = ->
@@ -64,7 +108,7 @@ angular.module 'dottyGrid' []
     $scope.xy2dot = (p) ->
       col = $scope.x2C p.0
       row = $scope.y2R p.1
-      $scope.rows[row][col]
+      $scope.grid.rows[row][col]
 
     $scope.svgWidth = -> scale * (inset + $scope.c2x colCount-1)
     $scope.svgHeight = -> scale * (inset + $scope.r2y 0)
@@ -72,19 +116,24 @@ angular.module 'dottyGrid' []
     #
     # dots in the dotty grid
     #
-    $scope.rows = for rowIndex from 0 til rowCount
+
+    rows = for rowIndex from 0 til rowCount
       for colIndex from 0 til colCount
         p: [colIndex, rowIndex]
         x: $scope.c2x colIndex
         y: $scope.r2y rowIndex
-        open: false
         first: false
-        fill: ->
-          if @first then '#ffcc00' else '#888888'
+        open: false
+
+    $scope.grid = {rows: rows}
+
+    $scope.classHash = (dot) -> do
+      circle: true
+      lit: dot.first
 
     $scope.closeAllDots = ->
       for rowIndex from 0 til rowCount
-        row = $scope.rows[rowIndex]
+        row = $scope.grid.rows[rowIndex]
         for colIndex from 0 til colCount
           dot = row[colIndex]
           dot.open = false
@@ -96,11 +145,15 @@ angular.module 'dottyGrid' []
     tracePolygons = ->
       console.log ($scope.polygons.map (polygon)->polygon.data.length).join " "
 
-    $scope.polyDraw = (dot) ->
+    $scope.lineDraw = (dot) ~>
+
+
+    $scope.polyDraw = (dot) ~>
       polygon = $scope.polygons[*-1]
       if dot.open
         if !dot.first
           return
+
         # close polygon and save in polygons array
         if polygon.data.length > 2
           $scope.polygons.push({data: []})
@@ -118,62 +171,51 @@ angular.module 'dottyGrid' []
         console.log "open"
       tracePolygons!
 
+    $scope.dotClick = (dot) ->
+      switch $scope.currentTool
+      | 'poly' => $scope.polyDraw dot
+
     $scope.polyPoints = (p) ->
       screenPoints = p.data.map $scope.cr2xy
       (flatten screenPoints).join " "
 
     $scope.polyClass = (p) ->
-      "polygon " + if p.highlighted then "opaque" else ""
+      "polygon " + if p.selected then "opaque" else ""
 
-    $scope.polyToggle = (p) -> p.highlighted = !p.highlighted
+    $scope.polyToggle = (p) -> p.selected = !p.selected
 
     $scope.visipolys = [{data: []}]
 
     $scope.visiDraw = (dot) ->
 
-  .controller 'toolsController', <[$scope]> ++ ($scope) ->
-    $scope.tools =
-      * icon: 'pencil'
-        label: 'Line'
-        type: 'primary'
-      * icon: 'pencil-square-o'
-        label: 'Polygon'
-        type: 'success'
-      * icon: 'sun-o'
-        label: 'Camera'
-        type: 'info'
-      * icon: 'times'
-        label: 'Delete'
-        type: 'danger'
 
+  # .directive 'd3', <[]> ++ ->
+  #   restrict: 'A'
+  #   link: (scope, element, attrs) !->
+  #     console.log "d3 directive"
 
-  .directive 'd3', <[]> ++ ->
-    restrict: 'A'
-    link: (scope, element, attrs) !->
-      console.log "d3 directive"
+  #     svg = d3.select element.0
 
-      svg = d3.select element.0
+  #     trace = ->
+  #       p = [x,y] = d3.mouse element.0
+  #       [c,r] = scope.xy2cr p
+  #       dot = scope.xy2dot p
+  #       console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 
-      trace = ->
-        # p = [x,y] = d3.mouse element.0
-        # [c,r] = scope.xy2cr p
-        # dot = scope.xy2dot p
-        # console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
-
-      highlighter = ->
-        p = d3.mouse element.0
-        console.log "polyScope=#{element.scope!$index}"
-        pos = scope.xy2cr p
-        insideList = scope.polygons.filter (poly) ->
-          poly.data.length > 2
-          and VisibilityPolygon.inPolygon pos, poly.data.concat!
-        for poly in insideList
-          poly.highlighted = !poly.highlighted
-        console.log insideList.length
+  #     selecter = ->
+  #       p = d3.mouse element.0
+  #       console.log "polyScope=#{element.scope!$index}"
+  #       pos = scope.xy2cr p
+  #       insideList = scope.polygons.filter (poly) ->
+  #         poly.data.length > 2
+  #         and VisibilityPolygon.inPolygon pos, poly.data.concat!
+  #       for poly in insideList
+  #         poly.selected = !poly.selected
+  #       console.log insideList.length
 
 
 
       # svg.on "mouseover", trace
-      # svg.on "mousedown", highlighter
+      # svg.on "mousedown", selecter
       # svg.on "mousemove", trace
       # svg.on "mouseup", trace
