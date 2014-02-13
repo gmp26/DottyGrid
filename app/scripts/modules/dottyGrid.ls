@@ -24,9 +24,15 @@ angular.module 'dottyGrid' []
       type: 'info'
       enabled: true
       active: ""
+    * id: 'visible'
+      icon: 'eye'
+      label: 'Show visible'
+      type: 'warning'
+      enabled: true
+      active: ""
     * id:'trash'
       icon: 'trash-o'
-      label: 'Delete Selection'
+      label: 'Delete selected'
       type: 'danger'
       enabled: true
       active: ""
@@ -42,6 +48,8 @@ angular.module 'dottyGrid' []
       $scope.polygons = remove $scope.polygons
       $scope.lines = remove $scope.lines
       $scope.cameras = remove $scope.cameras
+      $scope.visihash = {}
+      $scope.visipolys!
 
     $scope.currentTool = 'poly'
 
@@ -49,10 +57,13 @@ angular.module 'dottyGrid' []
       if tool.id == 'trash'
         $scope.deleteSelection!
       else
-        for t in $scope.toolset
-          t.active = ""
-          tool.active = "btn-lg"
-          $scope.currentTool = tool.id
+        if tool.id == 'visual'
+          $scope.toggleVisible!
+        else
+          for t in $scope.toolset
+            t.active = ""
+            tool.active = "btn-lg"
+            $scope.currentTool = tool.id
 
     $scope.trace = (col, row) ->
       console.log "(#{col}, #{row})"
@@ -263,9 +274,21 @@ angular.module 'dottyGrid' []
       polys = for k, v of $scope.visihash
         {data: v}
 
+    $scope.toggleVisible = ->
+      if $scope.visihas == {}
+        for c in $scope.cameras
+          containing = filter ((p)->VisibilityPolygon.inPolygon c.data, p.data), $scope.polygons
+          inside = containing and containing.length > 0
 
-    $scope.visiDraw = (dot) ->
-
+          if inside
+            # pick the first container
+            poly = containing.0
+            # console.debug poly.data
+            segments = VisibilityPolygon.convertToSegments([poly.data])
+            $scope.visihash[pointHash c.data] = VisibilityPolygon.compute c.data, segments
+            $scope.visipolys()
+      else
+        $scope.visihash = {}
 
   # .directive 'd3', <[]> ++ ->
   #   restrict: 'A'
