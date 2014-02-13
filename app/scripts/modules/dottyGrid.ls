@@ -1,6 +1,6 @@
 'use strict'
 
-{flatten, reject} = require 'prelude-ls'
+{flatten, reject, filter} = require 'prelude-ls'
 
 angular.module 'dottyGrid' []
 
@@ -38,7 +38,10 @@ angular.module 'dottyGrid' []
     $scope.toolset = toolset
 
     $scope.deleteSelection = ->
-      $scope.polygons = reject (.selected), $scope.polygons
+      remove = reject (.selected)
+      $scope.polygons = remove $scope.polygons
+      $scope.lines = remove $scope.lines
+      $scope.cameras = remove $scope.cameras
 
     $scope.currentTool = 'poly'
 
@@ -49,19 +52,19 @@ angular.module 'dottyGrid' []
         for t in $scope.toolset
           t.active = ""
           tool.active = "btn-lg"
-          $scope.currentTool = tool.active
+          $scope.currentTool = tool.id
 
     $scope.trace = (col, row) ->
       console.log "(#{col}, #{row})"
 
-    colCount = 50
-    rowCount = 50
+    colCount = 30
+    rowCount = 30
 
     # Pixels from centre of an edge dot to the svg container boundary
     inset = 20
 
     # Dot separation in pixels
-    sep = 18
+    sep = 30
     scale = 1
 
     $scope.transform = ->
@@ -123,7 +126,7 @@ angular.module 'dottyGrid' []
         x: $scope.c2x colIndex
         y: $scope.r2y rowIndex
         first: false
-        open: false
+        active: false
 
     $scope.grid = {rows: rows}
 
@@ -136,7 +139,7 @@ angular.module 'dottyGrid' []
         row = $scope.grid.rows[rowIndex]
         for colIndex from 0 til colCount
           dot = row[colIndex]
-          dot.open = false
+          dot.active = false
           dot.first = false
 
     # previously constructed polygons
@@ -145,12 +148,9 @@ angular.module 'dottyGrid' []
     tracePolygons = ->
       console.log ($scope.polygons.map (polygon)->polygon.data.length).join " "
 
-    $scope.lineDraw = (dot) ~>
-
-
     $scope.polyDraw = (dot) ~>
       polygon = $scope.polygons[*-1]
-      if dot.open
+      if dot.active
         if !dot.first
           return
 
@@ -163,17 +163,56 @@ angular.module 'dottyGrid' []
         console.log "close"
       else
         # append dot to current polygon
-        if dot.open
+        if dot.active
           return
         polygon.data.push(dot.p)
-        dot.open = $scope.polygons.length
+        dot.active = $scope.polygons.length
         dot.first = polygon.data.length == 1
-        console.log "open"
+        console.log "active"
       tracePolygons!
+
+    $scope.lines = []
+
+    $scope.lineDraw = (dot) ->
+      if $scope.lines.length > 0 && !$scope.lines[*-1].data.p2?
+        line = $scope.lines[*-1]
+      else
+        line = data:{}
+        $scope.lines[*] = line
+
+      if !line.data.p1?
+        line.data.p1 = dot.p
+        dot.first = true
+      else
+        line.data.p2 = dot.p
+        #$scope.lines.push [{}]
+        $scope.closeAllDots!
+      $scope.lines[*-1] = line
+
+    $scope.cameras = []
+
+    $scope.cameraDraw = (dot) ->
+
+      $scope.cameras[*] = 
+        data: dot.p
+
+      #console.debug $scope.cameras
+
+
+    $scope.cameraPoints = (c, component) ->
+      p = c.data
+      switch component
+      | 'x1' => $scope.c2x p.0
+      | 'y1' => $scope.r2y p.1
+      | 'x2' => $scope.c2x p.0
+      | 'y2' => $scope.r2y p.1
 
     $scope.dotClick = (dot) ->
       switch $scope.currentTool
+      | 'line' => $scope.lineDraw dot
       | 'poly' => $scope.polyDraw dot
+      | 'camera' => $scope.cameraDraw dot
+
 
     $scope.polyPoints = (p) ->
       screenPoints = p.data.map $scope.cr2xy
@@ -182,9 +221,48 @@ angular.module 'dottyGrid' []
     $scope.polyClass = (p) ->
       "polygon " + if p.selected then "opaque" else ""
 
+    $scope.lineClass = (line) ->
+      "line " + if line.selected then "opaque" else ""
+
+    pointHash = (p) -> "#{p.0.toString 16}#{p.1.toString 16}"
+
+    $scope.cameraClass = (c) ->
+      containing = filter ((p)->VisibilityPolygon.inPolygon c.data, p.data), $scope.polygons
+      inside = containing and containing.length > 0
+
+      if inside and !c.selected
+        # pick the first container
+        poly = containing.0
+        # console.debug poly.data
+        segments = VisibilityPolygon.convertToSegments([poly.data])
+        # segments = for s, i in segments by 2
+        #   s
+        # console.debug segments
+
+        $scope.visihash[pointHash c.data] = VisibilityPolygon.compute c.data, segments
+
+      "camera " + if c.selected then "opaque " else "" + if inside then "inside" else ""
+
     $scope.polyToggle = (p) -> p.selected = !p.selected
 
-    $scope.visipolys = [{data: []}]
+    $scope.linePoints = (line, component) ->
+      p1 = line.data.p1
+      p2 = line.data.p2 or p1
+      switch component
+      | 'x1' => $scope.c2x p1.0
+      | 'y1' => $scope.r2y p1.1
+      | 'x2' => $scope.c2x p2.0
+      | 'y2' => $scope.r2y p2.1
+
+    $scope.lineToggle = (line) -> line.selected = !line.selected
+
+    $scope.cameraToggle = (c) -> c.selected = !c.selected
+
+    $scope.visihash = {}
+    $scope.visipolys = ->
+      polys = for k, v of $scope.visihash
+        {data: v}
+
 
     $scope.visiDraw = (dot) ->
 

@@ -23,9 +23,17 @@
       <polygon ng-repeat="p in polygons" ng-attr-class="{{polyClass(p)}}" ng-click="polyToggle(p)"
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
-      <polygon ng-repeat="p in visipolys" class="visipoly"
+
+      <polygon ng-repeat="p in visipolys()" class="visipoly"
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
+
+      <line ng-repeat="line in lines" ng-attr-class="{{lineClass(line)}}" ng-click="lineToggle(line)"
+        ng-attr-x1="{{linePoints(line, 'x1')}}"
+        ng-attr-x2="{{linePoints(line, 'x2')}}"
+        ng-attr-y1="{{linePoints(line, 'y1')}}"
+        ng-attr-y2="{{linePoints(line, 'y2')}}"></line>
+
       <g ng-repeat="row in grid.rows" >
         <line ng-repeat="dot in row" ng-dblclick="visiDraw(dot)"  ng-click="dotClick(dot)"
           ng-attr-x1="{{dot.x}}"
@@ -35,6 +43,13 @@
           ng-class="classHash(dot)"
         ></line>
       </g>
+
+      <line ng-repeat="c in cameras" ng-click="cameraToggle(c)"
+        ng-attr-x1="{{cameraPoints(c, 'x1')}}"
+        ng-attr-x2="{{cameraPoints(c, 'x2')}}"
+        ng-attr-y1="{{cameraPoints(c, 'y1')}}"
+        ng-attr-y2="{{cameraPoints(c, 'y2')}}"
+        ng-class="cameraClass(c)"></line>
     </g>
   </svg>
 
