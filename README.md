@@ -6,7 +6,7 @@ Designed to support creative maths.
 Getting Started (Developers)
 ---
 
-Install [NodeJs]() and [Grunt](), then:
+Install [NodeJs](http://nodejs.org/) and [Grunt](http://gruntjs.com/), then:
 
 ```
 git clone https://github.com/gmp26/DottyGrid.git
