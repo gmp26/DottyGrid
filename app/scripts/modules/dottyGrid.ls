@@ -1,11 +1,17 @@
 'use strict'
 
-{flatten, reject, filter} = require 'prelude-ls'
+{flatten, reject, filter, empty, tail} = require 'prelude-ls'
 
 angular.module 'dottyGrid' []
 
+  .constant 'constants' do
+    showVis: 'Show visible'
+    hideVis: 'Hide visible'
+    eyeOpen: 'eye'
+    eyeClose: 'eye-slash'
+
   # define the toolset
-  .factory 'toolset', -> [
+  .factory 'toolset', <[constants]> ++ (constants) -> [
     * id: 'line'
       icon: 'pencil'
       label: 'Draw line'
@@ -25,8 +31,8 @@ angular.module 'dottyGrid' []
       enabled: true
       active: ""
     * id: 'visible'
-      icon: 'eye'
-      label: 'Show visible'
+      icon: constants.eyeOpen
+      label: constants.showVis
       type: 'warning'
       enabled: true
       active: ""
@@ -38,7 +44,7 @@ angular.module 'dottyGrid' []
       active: ""
   ]
 
-  .controller 'dottyGridController', <[$scope toolset]> ++ ($scope, toolset) ->
+  .controller 'dottyGridController', <[$scope toolset constants]> ++ ($scope, toolset, constants) ->
 
     console.log "dottyGridController"
     $scope.toolset = toolset
@@ -57,8 +63,8 @@ angular.module 'dottyGrid' []
       if tool.id == 'trash'
         $scope.deleteSelection!
       else
-        if tool.id == 'visual'
-          $scope.toggleVisible!
+        if tool.id == 'visible'
+          $scope.toggleVisible tool
         else
           for t in $scope.toolset
             t.active = ""
@@ -204,7 +210,7 @@ angular.module 'dottyGrid' []
 
     $scope.cameraDraw = (dot) ->
 
-      $scope.cameras[*] = 
+      $scope.cameras[*] =
         data: dot.p
 
       #console.debug $scope.cameras
@@ -241,18 +247,19 @@ angular.module 'dottyGrid' []
       containing = filter ((p)->VisibilityPolygon.inPolygon c.data, p.data), $scope.polygons
       inside = containing and containing.length > 0
 
-      if inside and !c.selected
-        # pick the first container
-        poly = containing.0
-        # console.debug poly.data
-        segments = VisibilityPolygon.convertToSegments([poly.data])
-        # segments = for s, i in segments by 2
-        #   s
-        # console.debug segments
+      # if inside and !c.selected
+      #   # pick the first container
+      #   poly = containing.0
+      #   # console.debug poly.data
+      #   segments = VisibilityPolygon.convertToSegments([poly.data])
+      #   # segments = for s, i in segments by 2
+      #   #   s
+      #   # console.debug segments
 
-        $scope.visihash[pointHash c.data] = VisibilityPolygon.compute c.data, segments
+      #   $scope.visihash[pointHash c.data] = VisibilityPolygon.compute c.data, segments
 
       "camera " + if c.selected then "opaque " else "" + if inside then "inside" else ""
+      # "camera inside" + if c.selected then "opaque " else ""
 
     $scope.polyToggle = (p) -> p.selected = !p.selected
 
@@ -274,21 +281,34 @@ angular.module 'dottyGrid' []
       polys = for k, v of $scope.visihash
         {data: v}
 
-    $scope.toggleVisible = ->
-      if $scope.visihas == {}
+    $scope.toggleVisible = (tool) ->
+
+      if tool.label == constants.showVis
+
+        tool.label = constants.hideVis
+        tool.icon = constants.eyeClose
+
         for c in $scope.cameras
+
           containing = filter ((p)->VisibilityPolygon.inPolygon c.data, p.data), $scope.polygons
           inside = containing and containing.length > 0
 
           if inside
             # pick the first container
             poly = containing.0
-            # console.debug poly.data
-            segments = VisibilityPolygon.convertToSegments([poly.data])
+
+            console.debug poly.data
+            segments = VisibilityPolygon.convertToSegments(poly.data)
             $scope.visihash[pointHash c.data] = VisibilityPolygon.compute c.data, segments
             $scope.visipolys()
       else
         $scope.visihash = {}
+
+        tool.label = constants.showVis
+        tool.icon = constants.eyeOpen
+
+
+
 
   # .directive 'd3', <[]> ++ ->
   #   restrict: 'A'
