@@ -73,10 +73,10 @@ angular.module 'visibility', []
       for segment, i in segments
         a1 = @angle segment.0, position
         a2 = @angle segment.1, position
-        active = a1 > -180 and a1 <= 0 and a2 <= 180 and a2 >= 0 and a2 - a1 > 180
-        active = a2 > -180 and a2 <= 0 and a1 <= 180 and a1 >= 0 and a1 - a2 > 180
-        @insert i, heap, position, segments, start, mapTable if active
-
+        
+        if (a1 > -180 and a1 <= 0 and a2 <= 180 and a2 >= 0 and a2 - a1 > 180) or
+          (a2 > -180 and a2 <= 0 and a1 <= 180 and a1 >= 0 and a1 - a2 > 180)
+          @insert i, heap, position, segments, start, mapTable
 
       i = 0
 
@@ -277,20 +277,22 @@ angular.module 'visibility', []
       Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI
 
     intersectLines: (a1, a2, b1, b2) ->
-      ua_t = (b2[0] - b1[0]) * (a1[1] - b1[1]) - (b2[1] - b1[1]) * (a1[0] - b1[0])
-      ub_t = (a2[0] - a1[0]) * (a1[1] - b1[1]) - (a2[1] - a1[1]) * (a1[0] - b1[0])
-      u_b = (b2[1] - b1[1]) * (a2[0] - a1[0]) - (b2[0] - b1[0]) * (a2[1] - a1[1])
-      unless u_b is 0
+      ua_t = (b2.0 - b1.0) * (a1.1 - b1.1) - (b2.1 - b1.1) * (a1.0 - b1.0)
+      ub_t = (a2.0 - a1.0) * (a1.1 - b1.1) - (a2.1 - a1.1) * (a1.0 - b1.0)
+      u_b = (b2.1 - b1.1) * (a2.0 - a1.0) - (b2.0 - b1.0) * (a2.1 - a1.1)
+      if u_b == 0
+        []
+      else
         ua = ua_t / u_b
         ub = ub_t / u_b
-        return [
-          a1[0] - ua * (a1[0] - a2[0])
-          a1[1] - ua * (a1[1] - a2[1])
-        ]
-      []
+        return 
+          a1.0 - ua * (a1.0 - a2.0)
+          a1.1 - ua * (a1.1 - a2.1)
 
     distance: (a, b) ->
-      (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1])
+      ab0 = a.0 - b.0
+      ab1 = a.1 - b.1
+      ab0 * ab0 + ab1 * ab1
 
     isOnSegment: (xi, yi, xj, yj, xk, yk) ->
       (xi <= xk or xj <= xk) and (xk <= xi or xk <= xj) and (yi <= yk or yj <= yk) and (yk <= yi or yk <= yj)

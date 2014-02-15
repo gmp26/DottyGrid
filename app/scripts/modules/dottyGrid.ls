@@ -311,7 +311,7 @@ angular.module 'dottyGrid' ['visibility']
             # Adding a small proprtion of the weighted sum of vertices ofte works. It will
             # fail for 
 
-            visipols = VisibilityPolygon.compute [camera.data.0+0.001, camera.data.1+0.001], segments
+            visipols = VisibilityPolygon.compute camera.data, segments
 
             console.log "visipols1"
             console.debug visipols
