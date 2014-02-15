@@ -92,7 +92,7 @@ VisibilityPolygon.compute = function(position, segments) {
 		} else if (shorten) {
 			polygon.push(VisibilityPolygon.intersectLines(segments[old_segment][0], segments[old_segment][1], position, vertex));
 			polygon.push(VisibilityPolygon.intersectLines(segments[heap[0]][0], segments[heap[0]][1], position, vertex));
-		}
+		} 
 	}
 	return polygon;
 };
@@ -304,5 +304,3 @@ VisibilityPolygon.doLineSegmentsIntersect = function(x1, y1, x2, y2, x3, y3, x4,
          (d3 == 0 && VisibilityPolygon.isOnSegment(x1, y1, x2, y2, x3, y3)) ||
          (d4 == 0 && VisibilityPolygon.isOnSegment(x1, y1, x2, y2, x4, y4));
 };
-
-

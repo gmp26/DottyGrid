@@ -57,6 +57,10 @@ module.exports = (grunt) ->
       #   files: {'app/scripts/templates.js': 'app/views/*.js.html' }
 
     watch:
+      js:
+        files: ['<%= yeoman.app %>/scripts/lib/*.js']
+        tasks: ['copy:js']
+
       coffee:
         files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee']
         tasks: ['coffee:dist']
