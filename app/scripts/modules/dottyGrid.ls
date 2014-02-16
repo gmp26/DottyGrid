@@ -55,10 +55,10 @@ angular.module 'dottyGrid' <[visibility]>
       remove = reject (.selected)
       $scope.polygons = remove $scope.polygons
       $scope.lines = remove $scope.lines
-      
+
       $scope.cameras = remove $scope.cameras
       $scope.visihash = {}
-      $scope.updateVisipolys
+      $scope.updateVisipolys!
 
     $scope.currentTool = 'poly'
 
