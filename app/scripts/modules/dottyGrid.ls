@@ -2,7 +2,7 @@
 
 {any, flatten, reject, filter, empty, tail} = require 'prelude-ls'
 
-angular.module 'dottyGrid' ['visibility']
+angular.module 'dottyGrid' <[visibility]>
 
   .constant 'constants' do
     showVis: 'Show visible'
@@ -246,14 +246,7 @@ angular.module 'dottyGrid' ['visibility']
     pointHash = (p) -> "#{p.0.toString 16}#{p.1.toString 16}"
 
     $scope.cameraClass = (c) ->
-      VisibilityPolygon = $scope.VisibilityPolygon
-      containing = filter ((p) -> $scope.VisibilityPolygon.inPolygon c.data, p.data), $scope.polygons
-      inside = containing and containing.length > 0
-
-      inside = false
-
-      "camera " + if c.selected then "opaque " else "" + if inside then "inside" else ""
-      # "camera inside" + if c.selected then "opaque " else ""
+      "camera " + if c.selected then "opaque " else ""
 
     $scope.polyToggle = (p) -> p.selected = !p.selected
 
@@ -277,6 +270,7 @@ angular.module 'dottyGrid' ['visibility']
 
     $scope.toggleVisible = (tool) ->
 
+      $scope.visihash = {}
       if tool.label == constants.showVis
 
         tool.label = constants.hideVis
@@ -284,23 +278,25 @@ angular.module 'dottyGrid' ['visibility']
 
         for camera in $scope.cameras
 
-          # make a list of polygons containing camera or with camera on edge or border
-          #containing = filter ((p)->VisibilityPolygon.inPolygon camera.data, p.data), $scope.polygons
-
           for p, i in $scope.polygons
             internal = VisibilityPolygon.inPolygon camera.data, p.data
-            if internal.0? and internal.1?
+            if typeof! internal is 'Array'
+              # the camera is on the polygon border: adjust so it it is fractionally inside
               console.log "adjusted"
               console.log camera.data
               console.log internal
+              camera.data = internal
+
             if internal
               poly = p
               break
 
+          console.log 'inside poly='
+          console.debug poly
+
           if internal
 
             console.log "camera is inside"
-            $scope.visihash = {}
 
             cm = colCount - 1
             rm = rowCount - 1
@@ -334,12 +330,11 @@ angular.module 'dottyGrid' ['visibility']
 
             $scope.visihash[pointHash camera.data] = visipols
       else
-        $scope.visihash = {}
 
         tool.label = constants.showVis
         tool.icon = constants.eyeOpen
 
-    $scope.updateVisipolys!
+      $scope.updateVisipolys!
 
 
 
