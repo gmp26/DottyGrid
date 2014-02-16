@@ -79,62 +79,84 @@ angular.module 'visibility', []
           @insert i, heap, position, segments, start, mapTable
 
       i = 0
-
       while i < sorted.length
         extend = false
         shorten = false
         orig = i
-        vertex = segments[sorted[i][0]][sorted[i][1]]
-        old_segment = heap[0]
+        vertex = segments[sorted[i].0][sorted[i].1]
+        old_segment = heap.0
         loop
-          unless mapTable[sorted[i][0]] is -1
-            if sorted[i][0] is old_segment
+          unless mapTable[sorted[i].0] is -1
+            if sorted[i].0 is old_segment
               extend = true
-              vertex = segments[sorted[i][0]][sorted[i][1]]
-            @remove mapTable[sorted[i][0]], heap, position, segments, vertex, mapTable
+              vertex = segments[sorted[i].0][sorted[i].1]
+            @remove mapTable[sorted[i].0], heap, position, segments, vertex, mapTable
           else
-            @insert sorted[i][0], heap, position, segments, vertex, mapTable
-            shorten = true  unless heap[0] is old_segment
+            @insert sorted[i].0, heap, position, segments, vertex, mapTable
+            shorten = true  unless heap.0 is old_segment
           ++i
           break  if i is sorted.length
-          break unless sorted[i][2] < sorted[orig][2] + @epsilon()
+          break unless sorted[i].2 < sorted[orig].2 + @epsilon()
         if extend
           polygon.push vertex
-          cur = @intersectLines(segments[heap[0]][0], segments[heap[0]][1], position, vertex)
+          cur = @intersectLines(segments[heap.0].0, segments[heap.0].1, position, vertex)
           polygon.push cur  unless @equal(cur, vertex)
         else if shorten
-          polygon.push @intersectLines(segments[old_segment][0], segments[old_segment][1], position, vertex)
-          polygon.push @intersectLines(segments[heap[0]][0], segments[heap[0]][1], position, vertex)
+          polygon.push @intersectLines(segments[old_segment].0, segments[old_segment].1, position, vertex)
+          polygon.push @intersectLines(segments[heap.0].0, segments[heap.0].1, position, vertex)
+
       polygon
 
     inPolygon: (position, polygon) ->
+
       val = 0
-      i = 0
+      for p in polygon
+        val = Math.min p.0, val
+        val = Math.min p.1, val
+      val -= 1
+      edge = [val, val]
 
-      while i < polygon.length
-        val = Math.min(polygon[i][0], val)
-        val = Math.min(polygon[i][1], val)
-        ++i
-      edge = [
-        val - 1
-        val - 1
-      ]
       parity = 0
-      i = 0
 
-      while i < polygon.length
+      for point0, i in polygon
         j = i + 1
-        j = 0  if j is polygon.length
-        if @doLineSegmentsIntersect(edge[0], edge[1], position[0], position[1], polygon[i][0], polygon[i][1], polygon[j][0], polygon[j][1])
-          intersect = @intersectLines(edge, position, polygon[i], polygon[j])
-          return true  if @equal(position, intersect)
-          if @equal(intersect, polygon[i])
-            ++parity  if @angle2(position, edge, polygon[j]) < 180
-          else if @equal(intersect, polygon[j])
-            ++parity  if @angle2(position, edge, polygon[i]) < 180
+        j = 0 if j is polygon.length
+        point1 = polygon[j]
+        if (@doLineSegmentsIntersect edge.0, edge.1, 
+          position.0, position.1, 
+          point0.0, point0.1, 
+          point1.0, point1.1)
+
+          intersect = @intersectLines edge, position, point0, point1
+          if @equal position, intersect
+            # position is on the border or a vertex of the polygon
+            # return true, but also suggest a position that is strictly inside
+
+            # calculate a,b as 2 vertices on either side of position
+            if position == point0
+              a = if i > 0 then polygon[i-1] else polygon[*-1]
+              b = point1
+            else if position == point1
+              a = point0
+              b = if j == polygon.length-1 then polygon[0] else polygon[j+1]
+            else
+              a = point0
+              b = point1
+
+            # calulate c1 and c2 as offset from position by a small amount
+            # perpendicular to ab. One or other of these should be entirely inside polygon.
+            delta = 0.5
+            c1 = [position.0+delta*((a.0+b.0)/2 + b.1-a.1), position.1+delta*((a.1+b.1)/2 + b.0-a.0)]
+            c2 = [position.0+delta*((a.0+b.0)/2 + a.1-b.1), position.1+delta*((a.1+b.1)/2 + a.0-b.0)]
+            return if @inPolygon c1, polygon then c1 else c2
+
+          if @equal intersect, point0
+            ++parity  if (@angle2 position, edge, point1) < 180
+          else if @equal intersect, point1
+            ++parity  if (@angle2 position, edge, point0) < 180
           else
             ++parity
-        ++i
+
       (parity % 2) isnt 0
 
     convertToSegments: (polygons) ->

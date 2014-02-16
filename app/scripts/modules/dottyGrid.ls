@@ -285,16 +285,23 @@ angular.module 'dottyGrid' ['visibility']
         for camera in $scope.cameras
 
           # make a list of polygons containing camera or with camera on edge or border
-          containing = filter ((p)->VisibilityPolygon.inPolygon camera.data, p.data), $scope.polygons
+          #containing = filter ((p)->VisibilityPolygon.inPolygon camera.data, p.data), $scope.polygons
 
-          inside = containing and containing.length > 0
+          for p, i in $scope.polygons
+            internal = VisibilityPolygon.inPolygon camera.data, p.data
+            if internal.0? and internal.1?
+              console.log "adjusted"
+              console.log camera.data
+              console.log internal
+            if internal
+              poly = p
+              break
 
-          if inside
+          if internal
+
             console.log "camera is inside"
             $scope.visihash = {}
 
-            # pick the first container
-            poly = containing.0
             cm = colCount - 1
             rm = rowCount - 1
             console.debug poly.data
@@ -313,8 +320,8 @@ angular.module 'dottyGrid' ['visibility']
 
             visipols = VisibilityPolygon.compute camera.data, segments
 
-            console.log "visipols1"
-            console.debug visipols
+            # console.log "visipols1"
+            # console.debug visipols
 
             # remove all external polygons
             # visipols = reject (pol) ->
@@ -322,17 +329,17 @@ angular.module 'dottyGrid' ['visibility']
             #   , pol
             # , visipols
 
-            console.log "visipols2"
-            console.debug visipols
+            # console.log "visipols2"
+            # console.debug visipols
 
             $scope.visihash[pointHash camera.data] = visipols
-            $scope.updateVisipolys!
       else
-        $scope.visipolys = {}
+        $scope.visihash = {}
 
         tool.label = constants.showVis
         tool.icon = constants.eyeOpen
 
+    $scope.updateVisipolys!
 
 
 
