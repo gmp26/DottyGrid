@@ -144,15 +144,18 @@ angular.module 'visibility', ['vectorOps']
                 a = point0
                 b = point1
 
-              # calulate c1 and c2 as offset from position by a small amount
+              # find offset from position by a small amount
               # perpendicular to ab. One or other of these should be entirely inside polygon.
-              diff = b `vec.sub` a
-              delta = 0.01 `vec.times` diff
-              offset = [delta.1, -delta.0]
-              c1 = position `vec.add` offset
-              c2 = position `vec.sub` offset
+              unita = vec.unit (a `vec.sub` position)
+              unitb = vec.unit (b `vec.sub` position)
+              diff = unitb `vec.sub` unita
+              #delta = 0.01 `vec.times` diff
+              offset = [diff.1, -diff.0]
+              delta = 0.01 `vec.times` offset
 
-              return if @inPolygon c1, polygon then c1 else c2
+              inset = position `vec.add` delta
+              outset = position `vec.sub` delta
+              return if @inPolygon inset, polygon then inset else outset
 
             if @equal intersect, point0
               ++parity  if (@angle2 position, edge, point1) < 180
