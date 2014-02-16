@@ -36,29 +36,29 @@ svg {
 }
 
 .line {
-    stroke: #428bca;
+    stroke: @brand-primary;
     stroke-width: 10;
     stroke-linecap: round;
     stroke-opacity: 0.5;
 }
 
 .polygon {
-    fill:#5cb85c;
+    fill: darken(@brand-success, 30%);
     fill-opacity:1;
     stroke: #555;
-    stroke-width:3;
+    stroke-width:5;
 }
 .camera {
-    stroke: #5bc0de;
+    stroke: @brand-info;
     stroke-width: 30;
     stroke-linecap: round;
     stroke-opacity: 0.5;    
 }
 
 .opaque {
-  stroke: red;
+  stroke: @brand-danger;
   fill-opacity:1.0;
-  stroke-opacity: 1.0;
+  stroke-opacity: 2.0;
 }
 
 .inside {
@@ -67,7 +67,7 @@ svg {
 
 .visipoly {
     fill:white;
-    fill-opacity:0.6;
+    fill-opacity:0.4;
     stroke:white;
     stroke-width:1;
     stroke-opacity:1;

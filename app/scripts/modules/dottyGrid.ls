@@ -2,7 +2,7 @@
 
 {any, flatten, reject, filter, empty, tail} = require 'prelude-ls'
 
-angular.module 'dottyGrid' <[visibility]>
+angular.module 'dottyGrid' <[visibility lines]>
 
   .constant 'constants' do
     showVis: 'Show visible'
@@ -12,12 +12,12 @@ angular.module 'dottyGrid' <[visibility]>
 
   # define the toolset
   .factory 'toolset', <[constants]> ++ (constants) -> [
-    * id: 'line'
-      icon: 'pencil'
-      label: 'Draw line'
-      type: 'primary'
-      enabled: true
-      active: ""
+    # * id: 'line'
+    #   icon: 'pencil'
+    #   label: 'Draw line'
+    #   type: 'primary'
+    #   enabled: true
+
     * id: 'poly'
       icon: 'pencil-square-o'
       label: 'Draw shape'
@@ -45,16 +45,56 @@ angular.module 'dottyGrid' <[visibility]>
   ]
 
   .controller 'dottyGridController', 
-  <[$scope toolset constants VisibilityPolygon]> ++ ($scope, toolset, constants, VisibilityPolygon) ->
+  <[$scope toolset lines constants VisibilityPolygon]> ++ ($scope, toolset, lines, constants, VisibilityPolygon) ->
 
     console.log "dottyGridController"
+
     $scope.toolset = toolset
+
+    plugins = []
+
+    installPlugin = (plugin, name) ->
+      plugin.init!
+      plugin.name = name
+      plugins[*] = plugin
+      $scope[name] = plugin.model
+      toolset.unshift plugin.tool
+
+      # install default deleteSelection hook
+      remove = reject (.selected)
+      plugin.deleteSelection ?= !->
+        # remove any selected instances, returning true if deletions happened
+        s = $scope[plugin.name]
+        len1 = s.length 
+        $scope[plugin.name] = s = remove s
+        s.length < len1
+
+      # install default tool button action
+      plugin.toolAction ?= (tool) ->
+        # select the tool button as currentTool, making it large, and the rest normal
+        plugin.tool.active = ""
+        $scope.currentTool = tool.id
+        for t in $scope.toolset
+          t.active = ""
+        tool.active = "btn-lg"
+        true
+
+
+    installPlugin lines, 'lines'
+
     $scope.VisibilityPolygon = VisibilityPolygon
 
     $scope.deleteSelection = ->
+
+      # delegate to deletion hooks
+      for plugin in plugins
+        plugin.deleteSelection!
+
       remove = reject (.selected)
       $scope.polygons = remove $scope.polygons
-      $scope.lines = remove $scope.lines
+
+      #$scope.lines.deleteSelection!
+      #$scope.lines = remove $scope.lines
 
       $scope.cameras = remove $scope.cameras
       $scope.visihash = {}
@@ -63,6 +103,12 @@ angular.module 'dottyGrid' <[visibility]>
     $scope.currentTool = 'poly'
 
     $scope.toolCheck = (tool) ->
+
+      # delegate to plugin toolActions
+      for plugin in plugins
+        if tool.id == plugin.tool.id
+          return plugin.toolAction tool
+
       if tool.id == 'trash'
         $scope.deleteSelection!
       else
@@ -191,8 +237,6 @@ angular.module 'dottyGrid' <[visibility]>
         console.log "active"
       tracePolygons!
 
-    $scope.lines = []
-
     $scope.lineDraw = (dot) ->
       if $scope.lines.length > 0 && !$scope.lines[*-1].data.p2?
         line = $scope.lines[*-1]
@@ -205,7 +249,6 @@ angular.module 'dottyGrid' <[visibility]>
         dot.first = true
       else
         line.data.p2 = dot.p
-        #$scope.lines.push [{}]
         $scope.closeAllDots!
       $scope.lines[*-1] = line
 
@@ -215,8 +258,6 @@ angular.module 'dottyGrid' <[visibility]>
 
       $scope.cameras[*] =
         data: dot.p
-
-      #console.debug $scope.cameras
 
 
     $scope.cameraPoints = (c, component) ->
@@ -228,10 +269,14 @@ angular.module 'dottyGrid' <[visibility]>
       | 'y2' => $scope.r2y p.1
 
     $scope.dotClick = (dot) ->
+      for plugin in plugins
+        if $scope.currentTool == plugin.tool.id
+          return plugin.draw dot
+
       switch $scope.currentTool
-      | 'line' => $scope.lineDraw dot
       | 'poly' => $scope.polyDraw dot
       | 'camera' => $scope.cameraDraw dot
+#      | 'line' => $scope.lineDraw dot
 
 
     $scope.polyPoints = (p) ->
