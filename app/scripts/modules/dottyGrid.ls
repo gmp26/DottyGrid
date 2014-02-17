@@ -1,8 +1,8 @@
 'use strict'
 
-{any, flatten, reject, filter, empty, tail} = require 'prelude-ls'
+{any, empty, filter, flatten, reject, sort-by, tail} = require 'prelude-ls'
 
-angular.module 'dottyGrid' <[visibility lines]>
+angular.module 'dottyGrid' <[visibility lines polygons]>
 
   .constant 'constants' do
     showVis: 'Show visible'
@@ -12,40 +12,59 @@ angular.module 'dottyGrid' <[visibility lines]>
 
   # define the toolset
   .factory 'toolset', <[constants]> ++ (constants) -> [
+
     # * id: 'line'
     #   icon: 'pencil'
     #   label: 'Draw line'
     #   type: 'primary'
     #   enabled: true
 
-    * id: 'poly'
-      icon: 'pencil-square-o'
-      label: 'Draw shape'
-      type: 'success'
-      enabled: true
-      active: "btn-lg"
+    # * id: 'poly'
+    #   icon: 'pencil-square-o'
+    #   label: 'Draw shape'
+    #   type: 'success'
+    #   enabled: true
+    #   active: "btn-lg"
+
     * id: 'camera'
       icon: 'sun-o'
       label: 'Add camera'
       type: 'info'
       enabled: true
       active: ""
-    * id: 'visible'
-      icon: constants.eyeOpen
-      label: constants.showVis
-      type: 'warning'
-      enabled: true
-      active: ""
+      weight: 3
+    # * id: 'visible'
+    #   icon: constants.eyeOpen
+    #   label: constants.showVis
+    #   type: 'warning'
+    #   enabled: true
+    #   active: ""
+    #   weight: 4
     * id:'trash'
       icon: 'trash-o'
       label: 'Delete selected'
       type: 'danger'
       enabled: true
       active: ""
+      weight: 5
   ]
 
   .controller 'dottyGridController', 
-  <[$scope toolset linesFactory constants VisibilityPolygon]> ++ ($scope, toolset, linesFactory, constants, VisibilityPolygon) ->
+  <[
+    $scope
+    toolset 
+    linesFactory
+    polygonsFactory
+    constants
+    VisibilityPolygon
+  ]> ++ ( 
+    $scope, 
+    toolset, 
+    linesFactory, 
+    polygonsFactory, 
+    constants, 
+    VisibilityPolygon
+  ) ->
 
     console.log "dottyGridController"
 
@@ -53,12 +72,14 @@ angular.module 'dottyGrid' <[visibility lines]>
 
     plugins = []
 
-    installPlugin = (plugin, name) ->
+    installPlugin = (plugin, name, active) ->
       plugin.init $scope
       plugin.name = name
       plugins[*] = plugin
-      toolset.unshift plugin.tool
+      toolset[*] = plugin.tool
       $scope[name] = -> plugin.model!
+      if active
+        plugin.tool.active = "btn-lg"
 
       # install default tool button action
       plugin.toolAction ?= (tool) ->
@@ -70,21 +91,31 @@ angular.module 'dottyGrid' <[visibility lines]>
         tool.active = "btn-lg"
         true
 
+    installPlugin polygonsFactory, 'polygons', true
     installPlugin linesFactory, 'lines'
+    $scope.toolset = sort-by (.weight), toolset
 
     $scope.VisibilityPolygon = VisibilityPolygon
 
     $scope.deleteSelection = ->
-
       # delegate to deletion hooks
-      for plugin in plugins
-        plugin.deleteSelection!
+      plugins.map (.deleteSelection!)
+
+      # for plugin in plugins
+      #   plugin.deleteSelection!
 
       remove = reject (.selected)
-      $scope.polygons = remove $scope.polygons
-
       $scope.cameras = remove $scope.cameras
-      $scope.visipolys = $scope.cameras.map (.visipol)
+
+      # if we deleted a containing polygon of a camera, make sure
+      # we also delete that camera's visipols
+      for camera in $scope.cameras
+        unless any ((p)->p == camera.poly), $scope.polygons!
+          $scope.visipolys = reject ((v)->v == camera.visipol), $scope.visipolys
+          delete camera.poly
+          delete camera.visipol
+
+      $scope.visipolys = reject (==void), $scope.cameras.map (.visipol)
 
     $scope.currentTool = 'poly'
 
@@ -98,13 +129,13 @@ angular.module 'dottyGrid' <[visibility lines]>
       if tool.id == 'trash'
         $scope.deleteSelection!
       else
-        if tool.id == 'visible'
-          $scope.toggleVisible tool
-        else
-          for t in $scope.toolset
-            t.active = ""
-            tool.active = "btn-lg"
-            $scope.currentTool = tool.id
+        # if tool.id == 'visible'
+        #   $scope.toggleVisible tool
+        # else
+        for t in $scope.toolset
+          t.active = ""
+          tool.active = "btn-lg"
+          $scope.currentTool = tool.id
 
     $scope.trace = (col, row) ->
       console.log "(#{col}, #{row})"
@@ -195,40 +226,39 @@ angular.module 'dottyGrid' <[visibility lines]>
           dot.first = false
 
     # previously constructed polygons
-    $scope.polygons = [{data: []}]
+    #$scope.polygons! = [{data: []}]
 
-    tracePolygons = ->
-      console.log ($scope.polygons.map (polygon)->polygon.data.length).join " "
+    # tracePolygons = ->
+    #   console.log ($scope.polygons!map (polygon)->polygon.data.length).join " "
 
-    $scope.polyDraw = (dot) ~>
-      polygon = $scope.polygons[*-1]
-      if dot.active
-        if !dot.first
-          return
+    # $scope.polyDraw = (dot) ~>
+    #   polygon = $scope.polygons![*-1]
+    #   if dot.active
+    #     if !dot.first
+    #       return
 
-        # close polygon and save in polygons array
-        if polygon.data.length > 2
-          $scope.polygons.push({data: []})
-        else
-          polygon.data = []
-        $scope.closeAllDots!
-        console.log "close"
-      else
-        # append dot to current polygon
-        if dot.active
-          return
-        polygon.data.push(dot.p)
-        dot.active = $scope.polygons.length
-        dot.first = polygon.data.length == 1
-        console.log "active"
-      tracePolygons!
+    #     # close polygon and save in polygons array
+    #     if polygon.data.length > 2
+    #       $scope.polygons!.push({data: []})
+    #     else
+    #       polygon.data = []
+    #     $scope.closeAllDots!
+    #     console.log "close"
+    #   else
+    #     # append dot to current polygon
+    #     if dot.active
+    #       return
+    #     polygon.data.push(dot.p)
+    #     dot.active = $scope.polygons!length
+    #     dot.first = polygon.data.length == 1
+    #     console.log "active"
+    #   tracePolygons!
 
     $scope.cameras = []
 
     $scope.cameraDraw = (dot) ->
       $scope.cameras[*] =
         data: dot.p
-      $scope.makeVisibles!
 
 
     $scope.cameraPoints = (c, component) ->
@@ -241,12 +271,15 @@ angular.module 'dottyGrid' <[visibility lines]>
 
     $scope.dotClick = (dot) ->
       for plugin in plugins
-        if $scope.currentTool == plugin.tool.id
-          return plugin.draw dot
+        if $scope.currentTool == plugin.tool.id && plugin.draw
+          plugin.draw dot
+          $scope.makeVisibles!
+          return 
 
-      switch $scope.currentTool
-      | 'poly' => $scope.polyDraw dot
-      | 'camera' => $scope.cameraDraw dot
+      if $scope.currentTool == 'camera'
+        $scope.cameraDraw dot
+
+      $scope.makeVisibles!
 
 
     $scope.polyPoints = (p) ->
@@ -274,11 +307,12 @@ angular.module 'dottyGrid' <[visibility lines]>
 
       for camera in $scope.cameras
 
-        for p, i in $scope.polygons
+        for p, i in $scope.polygons!
           internal = VisibilityPolygon.inPolygon camera.data, p.data
           if typeof! internal is 'Array'
             # the camera is on the polygon border: adjust so it so is fractionally inside
             camera.data = internal
+            console.log "adjusted = #{internal}"
 
           if internal
             poly = p
@@ -293,6 +327,7 @@ angular.module 'dottyGrid' <[visibility lines]>
             poly.data
           ]
 
+          camera.poly = poly
           camera.visipol =
             selected: camera.selected
             data: VisibilityPolygon.compute camera.data, segments
@@ -301,21 +336,21 @@ angular.module 'dottyGrid' <[visibility lines]>
 
       $scope.visipolys = $scope.cameras.map (.visipol)
 
-    $scope.toggleVisible = (tool) ->
+    # $scope.toggleVisible = (tool) ->
 
-      if tool.label == constants.showVis
+    #   if tool.label == constants.showVis
 
-        tool.label = constants.hideVis
-        tool.icon = constants.eyeClose
+    #     tool.label = constants.hideVis
+    #     tool.icon = constants.eyeClose
 
-        $scope.visipolys = $scope.cameras.map (.visipol)
+    #     $scope.visipolys = $scope.cameras.map (.visipol)
 
-      else
+    #   else
 
-        tool.label = constants.showVis
-        tool.icon = constants.eyeOpen
+    #     tool.label = constants.showVis
+    #     tool.icon = constants.eyeOpen
 
-        $scope.visipolys = []
+    #     $scope.visipolys = []
 
 
 

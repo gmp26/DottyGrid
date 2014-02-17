@@ -11,10 +11,9 @@ angular.module 'lines', []
         @selected = false
         @klass = "line"
         @data = {}
-        @parent = lines
         @toggle = -> 
           @selected = !@selected
-          @klass = "line " + if @selected then "line opaque" else "line"         
+          @klass = "line " + if @selected then " opaque" else ""         
         @x1 = 0
         @y1 = 0
         @x2 = 0
@@ -43,6 +42,7 @@ angular.module 'lines', []
         label: 'Draw line'
         type: 'primary'
         enabled: true
+        weight: 1
 
       dotA: null
 
