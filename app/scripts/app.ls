@@ -1,6 +1,6 @@
 'use strict'
 
-angular.module 'illuminateApp' <[ ngRoute mainController]>
+angular.module 'DottyApp' <[ ngRoute mainController]>
   .config <[$routeProvider]> ++ ($routeProvider) ->
     $routeProvider.when '/', {
       templateUrl: 'views/main.html'

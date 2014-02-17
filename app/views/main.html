@@ -24,18 +24,18 @@
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
 
-      <polygon ng-repeat="p in visipolys" class="visipoly"
+      <polygon ng-repeat="p in visipolys" ng-attr-class="{{visiClass(p)}}"
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
 
-      <line ng-repeat="line in lines()" ng-attr-class="{{line.getClass()}}" ng-click="line.toggle()"
+      <line ng-repeat="line in lines()" ng-attr-class="{{line.klass}}" ng-click="line.toggle()"
         ng-attr-x1="{{line.x1}}"
         ng-attr-x2="{{line.x2}}"
         ng-attr-y1="{{line.y1}}"
         ng-attr-y2="{{line.y2}}"></line>
 
       <g ng-repeat="row in grid.rows" >
-        <line ng-repeat="dot in row" ng-dblclick="visiDraw(dot)"  ng-click="dotClick(dot)"
+        <line ng-repeat="dot in row" ng-click="dotClick(dot)"
           ng-attr-x1="{{dot.x}}"
           ng-attr-x2="{{dot.x}}"
           ng-attr-y1="{{dot.y}}"

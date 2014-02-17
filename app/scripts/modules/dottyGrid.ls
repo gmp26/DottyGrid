@@ -45,14 +45,13 @@ angular.module 'dottyGrid' <[visibility lines]>
   ]
 
   .controller 'dottyGridController', 
-  <[$scope toolset lines constants VisibilityPolygon]> ++ ($scope, toolset, lines, constants, VisibilityPolygon) ->
+  <[$scope toolset linesFactory constants VisibilityPolygon]> ++ ($scope, toolset, linesFactory, constants, VisibilityPolygon) ->
 
     console.log "dottyGridController"
 
     $scope.toolset = toolset
 
     plugins = []
-
 
     installPlugin = (plugin, name) ->
       plugin.init $scope
@@ -71,7 +70,7 @@ angular.module 'dottyGrid' <[visibility lines]>
         tool.active = "btn-lg"
         true
 
-    installPlugin lines, 'lines'
+    installPlugin linesFactory, 'lines'
 
     $scope.VisibilityPolygon = VisibilityPolygon
 
@@ -85,8 +84,7 @@ angular.module 'dottyGrid' <[visibility lines]>
       $scope.polygons = remove $scope.polygons
 
       $scope.cameras = remove $scope.cameras
-      $scope.visihash = {}
-      $scope.updateVisipolys!
+      $scope.visipolys = $scope.cameras.map (.visipol)
 
     $scope.currentTool = 'poly'
 
@@ -228,9 +226,9 @@ angular.module 'dottyGrid' <[visibility lines]>
     $scope.cameras = []
 
     $scope.cameraDraw = (dot) ->
-
       $scope.cameras[*] =
         data: dot.p
+      $scope.makeVisibles!
 
 
     $scope.cameraPoints = (c, component) ->
@@ -258,6 +256,9 @@ angular.module 'dottyGrid' <[visibility lines]>
     $scope.polyClass = (p) ->
       "polygon " + if p.selected then "opaque" else ""
 
+    $scope.visiClass = (p) ->
+      "visipoly " + if p.selected then "selected" else ""
+
     pointHash = (p) -> "#{p.0.toString 16}#{p.1.toString 16}"
 
     $scope.cameraClass = (c) ->
@@ -265,80 +266,56 @@ angular.module 'dottyGrid' <[visibility lines]>
 
     $scope.polyToggle = (p) -> p.selected = !p.selected
 
-    $scope.cameraToggle = (c) -> c.selected = !c.selected
+    $scope.cameraToggle = (c) ->
+      c.selected = !c.selected
+      c.visipol.selected = c.selected
 
-    $scope.visihash = {}
-    $scope.updateVisipolys = ->
-      $scope.visipolys = for k, v of $scope.visihash
-        {data: v}
+    $scope.makeVisibles =  ->
+
+      for camera in $scope.cameras
+
+        for p, i in $scope.polygons
+          internal = VisibilityPolygon.inPolygon camera.data, p.data
+          if typeof! internal is 'Array'
+            # the camera is on the polygon border: adjust so it so is fractionally inside
+            camera.data = internal
+
+          if internal
+            poly = p
+            break
+
+        if internal
+          cm = colCount - 1
+          rm = rowCount - 1
+          console.debug poly.data
+          segments = VisibilityPolygon.convertToSegments [
+            [[0, 0], [cm, 0], [cm, rm], [0, rm]]
+            poly.data
+          ]
+
+          camera.visipol =
+            selected: camera.selected
+            data: VisibilityPolygon.compute camera.data, segments
+        else
+          delete camera.visipol
+
+      $scope.visipolys = $scope.cameras.map (.visipol)
 
     $scope.toggleVisible = (tool) ->
 
-      $scope.visihash = {}
       if tool.label == constants.showVis
 
         tool.label = constants.hideVis
         tool.icon = constants.eyeClose
 
-        for camera in $scope.cameras
+        $scope.visipolys = $scope.cameras.map (.visipol)
 
-          for p, i in $scope.polygons
-            internal = VisibilityPolygon.inPolygon camera.data, p.data
-            if typeof! internal is 'Array'
-              # the camera is on the polygon border: adjust so it it is fractionally inside
-              console.log "adjusted"
-              console.log camera.data
-              console.log internal
-              camera.data = internal
-
-            if internal
-              poly = p
-              break
-
-          console.log 'inside poly='
-          console.debug poly
-
-          if internal
-
-            console.log "camera is inside"
-
-            cm = colCount - 1
-            rm = rowCount - 1
-            console.debug poly.data
-            segments = VisibilityPolygon.convertToSegments [
-              [[0, 0], [cm, 0], [cm, rm], [0, rm]]
-              poly.data
-            ]
-
-            # camera at vertex or edge means causes VisibilityPolygon.compute to return _both_
-            # the external and internal visibilty polygon.
-
-
-            # Force calculation of the internal polygon by offsetting the camera.
-            # Adding a small proprtion of the weighted sum of vertices ofte works. It will
-            # fail for 
-
-            visipols = VisibilityPolygon.compute camera.data, segments
-
-            # console.log "visipols1"
-            # console.debug visipols
-
-            # remove all external polygons
-            # visipols = reject (pol) ->
-            #   any (vertex) -> !(VisibilityPolygon.inPolygon vertex, poly.data)
-            #   , pol
-            # , visipols
-
-            # console.log "visipols2"
-            # console.debug visipols
-
-            $scope.visihash[pointHash camera.data] = visipols
       else
 
         tool.label = constants.showVis
         tool.icon = constants.eyeOpen
 
-      $scope.updateVisipolys!
+        $scope.visipolys = []
 
 
 

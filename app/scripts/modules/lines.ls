@@ -4,15 +4,17 @@
 # simple module that adds line drawing
 #
 angular.module 'lines', []
-  .factory 'lines', -> 
+  .factory 'linesFactory', -> 
 
     class Line
       (lines) -> 
         @selected = false
-        @getClass = -> "line " + if @selected then "line opaque" else "line"
+        @klass = "line"
         @data = {}
         @parent = lines
-        @toggle = -> @selected = !@selected 
+        @toggle = -> 
+          @selected = !@selected
+          @klass = "line " + if @selected then "line opaque" else "line"         
         @x1 = 0
         @y1 = 0
         @x2 = 0
