@@ -28,11 +28,11 @@
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
 
-      <line ng-repeat="line in lines" ng-attr-class="{{lineClass(line)}}" ng-click="lineToggle(line)"
-        ng-attr-x1="{{linePoints(line, 'x1')}}"
-        ng-attr-x2="{{linePoints(line, 'x2')}}"
-        ng-attr-y1="{{linePoints(line, 'y1')}}"
-        ng-attr-y2="{{linePoints(line, 'y2')}}"></line>
+      <line ng-repeat="line in lines()" ng-attr-class="{{line.getClass()}}" ng-click="line.toggle()"
+        ng-attr-x1="{{line.x1}}"
+        ng-attr-x2="{{line.x2}}"
+        ng-attr-y1="{{line.y1}}"
+        ng-attr-y2="{{line.y2}}"></line>
 
       <g ng-repeat="row in grid.rows" >
         <line ng-repeat="dot in row" ng-dblclick="visiDraw(dot)"  ng-click="dotClick(dot)"

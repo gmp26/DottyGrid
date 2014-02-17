@@ -53,21 +53,13 @@ angular.module 'dottyGrid' <[visibility lines]>
 
     plugins = []
 
+
     installPlugin = (plugin, name) ->
-      plugin.init!
+      plugin.init $scope
       plugin.name = name
       plugins[*] = plugin
-      $scope[name] = plugin.model
       toolset.unshift plugin.tool
-
-      # install default deleteSelection hook
-      remove = reject (.selected)
-      plugin.deleteSelection ?= !->
-        # remove any selected instances, returning true if deletions happened
-        s = $scope[plugin.name]
-        len1 = s.length 
-        $scope[plugin.name] = s = remove s
-        s.length < len1
+      $scope[name] = -> plugin.model!
 
       # install default tool button action
       plugin.toolAction ?= (tool) ->
@@ -78,7 +70,6 @@ angular.module 'dottyGrid' <[visibility lines]>
           t.active = ""
         tool.active = "btn-lg"
         true
-
 
     installPlugin lines, 'lines'
 
@@ -92,9 +83,6 @@ angular.module 'dottyGrid' <[visibility lines]>
 
       remove = reject (.selected)
       $scope.polygons = remove $scope.polygons
-
-      #$scope.lines.deleteSelection!
-      #$scope.lines = remove $scope.lines
 
       $scope.cameras = remove $scope.cameras
       $scope.visihash = {}
@@ -237,21 +225,6 @@ angular.module 'dottyGrid' <[visibility lines]>
         console.log "active"
       tracePolygons!
 
-    $scope.lineDraw = (dot) ->
-      if $scope.lines.length > 0 && !$scope.lines[*-1].data.p2?
-        line = $scope.lines[*-1]
-      else
-        line = data:{}
-        $scope.lines[*] = line
-
-      if !line.data.p1?
-        line.data.p1 = dot.p
-        dot.first = true
-      else
-        line.data.p2 = dot.p
-        $scope.closeAllDots!
-      $scope.lines[*-1] = line
-
     $scope.cameras = []
 
     $scope.cameraDraw = (dot) ->
@@ -276,7 +249,6 @@ angular.module 'dottyGrid' <[visibility lines]>
       switch $scope.currentTool
       | 'poly' => $scope.polyDraw dot
       | 'camera' => $scope.cameraDraw dot
-#      | 'line' => $scope.lineDraw dot
 
 
     $scope.polyPoints = (p) ->
@@ -286,26 +258,12 @@ angular.module 'dottyGrid' <[visibility lines]>
     $scope.polyClass = (p) ->
       "polygon " + if p.selected then "opaque" else ""
 
-    $scope.lineClass = (line) ->
-      "line " + if line.selected then "opaque" else ""
-
     pointHash = (p) -> "#{p.0.toString 16}#{p.1.toString 16}"
 
     $scope.cameraClass = (c) ->
       "camera " + if c.selected then "opaque " else ""
 
     $scope.polyToggle = (p) -> p.selected = !p.selected
-
-    $scope.linePoints = (line, component) ->
-      p1 = line.data.p1
-      p2 = line.data.p2 or p1
-      switch component
-      | 'x1' => $scope.c2x p1.0
-      | 'y1' => $scope.r2y p1.1
-      | 'x2' => $scope.c2x p2.0
-      | 'y2' => $scope.r2y p2.1
-
-    $scope.lineToggle = (line) -> line.selected = !line.selected
 
     $scope.cameraToggle = (c) -> c.selected = !c.selected
 
