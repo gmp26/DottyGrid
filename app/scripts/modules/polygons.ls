@@ -6,17 +6,17 @@
 # simple module that adds polygon drawing
 #
 angular.module 'polygons', []
-  .factory 'polygonsFactory', -> 
+  .factory 'polygonsFactory', ->
 
     class Polygon
-      -> 
+      ->
         @selected = false
         @klass = "polygon"
         @data = []
         @ppoints = ""
-        @toggle = -> 
+        @toggle = ->
           @selected = !@selected
-          @klass = "polygon " + if @selected then " opaque" else ""         
+          @klass = "polygon " + if @selected then " opaque" else ""
 
     do
       polygons: [new Polygon()]
@@ -78,23 +78,5 @@ angular.module 'polygons', []
 
         @tracePolygons!
 
-    # $scope.polyDraw = (dot) ~>
-
-    #     # close polygon and save in polygons array
-    #     if polygon.data.length > 2
-    #       $scope.polygons!.push({data: []})
-    #     else
-    #       polygon.data = []
-    #     $scope.closeAllDots!
-    #     console.log "close"
-    #   else
-    #     # append dot to current polygon
-    #     if dot.active
-    #       return
-    #     polygon.data.push(dot.p)
-    #     dot.active = $scope.polygons!length
-    #     dot.first = polygon.data.length == 1
-    #     console.log "active"
-    #   tracePolygons!
 
 

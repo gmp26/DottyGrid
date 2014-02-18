@@ -225,35 +225,6 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
           dot.active = false
           dot.first = false
 
-    # previously constructed polygons
-    #$scope.polygons! = [{data: []}]
-
-    # tracePolygons = ->
-    #   console.log ($scope.polygons!map (polygon)->polygon.data.length).join " "
-
-    # $scope.polyDraw = (dot) ~>
-    #   polygon = $scope.polygons![*-1]
-    #   if dot.active
-    #     if !dot.first
-    #       return
-
-    #     # close polygon and save in polygons array
-    #     if polygon.data.length > 2
-    #       $scope.polygons!.push({data: []})
-    #     else
-    #       polygon.data = []
-    #     $scope.closeAllDots!
-    #     console.log "close"
-    #   else
-    #     # append dot to current polygon
-    #     if dot.active
-    #       return
-    #     polygon.data.push(dot.p)
-    #     dot.active = $scope.polygons!length
-    #     dot.first = polygon.data.length == 1
-    #     console.log "active"
-    #   tracePolygons!
-
     $scope.cameras = []
 
     $scope.cameraDraw = (dot) ->
@@ -276,8 +247,8 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
           $scope.makeVisibles!
           return
 
-      if $scope.currentTool == 'camera'
-        $scope.cameraDraw dot
+      # if $scope.currentTool == 'camera'
+      #   $scope.cameraDraw dot
 
       $scope.makeVisibles!
 
@@ -337,36 +308,30 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
       $scope.visipolys = (filter (.visipol), $scope.cameras).map (.visipol)
 
-    # $scope.toggleVisible = (tool) ->
+  .directive 'd3', <[]> ++ ->
+    restrict: 'A'
+    link: (scope, element, attrs) !->
+      console.log "d3 directive"
 
-    #   if tool.label == constants.showVis
+      svg = d3.select element.0
 
-    #     tool.label = constants.hideVis
-    #     tool.icon = constants.eyeClose
+      trace = ->
+        p = [x,y] = d3.mouse element.0
+        [c,r] = scope.xy2cr p
+        dot = scope.xy2dot p
+        console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 
-    #     $scope.visipolys = $scope.cameras.map (.visipol)
+      d3Click = (event) ->
+        trace!
+        if scope.currentTool == 'camera'
+          p = [x,y] = d3.mouse element.0
+          [c,r] = scope.xy2cr p
+          scope.cameras[*] =
+            data: [c,r]
+          scope.cameraDraw
+          scope.makeVisibles!
+        scope.$apply!
 
-    #   else
-
-    #     tool.label = constants.showVis
-    #     tool.icon = constants.eyeOpen
-
-    #     $scope.visipolys = []
-
-
-
-  # .directive 'd3', <[]> ++ ->
-  #   restrict: 'A'
-  #   link: (scope, element, attrs) !->
-  #     console.log "d3 directive"
-
-  #     svg = d3.select element.0
-
-  #     trace = ->
-  #       p = [x,y] = d3.mouse element.0
-  #       [c,r] = scope.xy2cr p
-  #       dot = scope.xy2dot p
-  #       console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 
   #     selecter = ->
   #       p = d3.mouse element.0
@@ -382,6 +347,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
 
       # svg.on "mouseover", trace
-      # svg.on "mousedown", selecter
+      svg.on "click", d3Click
+      # svg.on "mousedown", trace
       # svg.on "mousemove", trace
       # svg.on "mouseup", trace
