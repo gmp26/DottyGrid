@@ -3,5 +3,6 @@ dist
 .tmp
 .sass-cache
 .DS_Store
+app/scripts/templates.ls
 *~
 app/bower_components
