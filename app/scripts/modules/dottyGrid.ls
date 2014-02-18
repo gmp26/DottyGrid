@@ -1,6 +1,6 @@
 'use strict'
 
-{any, empty, filter, flatten, reject, sort-by, tail} = require 'prelude-ls'
+{any, empty, filter, find, flatten, reject, sort-by, tail} = require 'prelude-ls'
 
 angular.module 'dottyGrid' <[visibility lines polygons]>
 
@@ -117,9 +117,9 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
       $scope.visipolys = reject (==void), $scope.cameras.map (.visipol)
 
-    $scope.currentTool = 'poly'
-
     $scope.toolCheck = (tool) ->
+
+      $scope.lastTool = find (.id == $scope.currentTool), toolset
 
       # delegate to plugin toolActions
       for plugin in plugins
@@ -136,6 +136,9 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
           t.active = ""
           tool.active = "btn-lg"
           $scope.currentTool = tool.id
+
+    # initiall set the current tool to 'poly'
+    $scope.toolCheck find (.id == 'poly'), toolset
 
     $scope.trace = (col, row) ->
       console.log "(#{col}, #{row})"
@@ -330,6 +333,10 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
             data: [c,r]
           scope.cameraDraw
           scope.makeVisibles!
+
+          # switch back to previous tool immediately
+          scope.toolCheck scope.lastTool
+
         scope.$apply!
 
 
