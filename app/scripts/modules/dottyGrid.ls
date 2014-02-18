@@ -49,20 +49,20 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
       weight: 5
   ]
 
-  .controller 'dottyGridController', 
+  .controller 'dottyGridController',
   <[
     $scope
-    toolset 
+    toolset
     linesFactory
     polygonsFactory
     constants
     VisibilityPolygon
-  ]> ++ ( 
-    $scope, 
-    toolset, 
-    linesFactory, 
-    polygonsFactory, 
-    constants, 
+  ]> ++ (
+    $scope,
+    toolset,
+    linesFactory,
+    polygonsFactory,
+    constants,
     VisibilityPolygon
   ) ->
 
@@ -274,7 +274,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
         if $scope.currentTool == plugin.tool.id && plugin.draw
           plugin.draw dot
           $scope.makeVisibles!
-          return 
+          return
 
       if $scope.currentTool == 'camera'
         $scope.cameraDraw dot
@@ -301,7 +301,8 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
     $scope.cameraToggle = (c) ->
       c.selected = !c.selected
-      c.visipol.selected = c.selected
+      if c.visipol
+        c.visipol.selected = c.selected
 
     $scope.makeVisibles =  ->
 
@@ -334,7 +335,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
         else
           delete camera.visipol
 
-      $scope.visipolys = $scope.cameras.map (.visipol)
+      $scope.visipolys = (filter (.visipol), $scope.cameras).map (.visipol)
 
     # $scope.toggleVisible = (tool) ->
 
