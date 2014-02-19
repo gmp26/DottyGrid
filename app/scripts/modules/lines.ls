@@ -10,10 +10,12 @@ angular.module 'lines', []
       (lines) -> 
         @selected = false
         @klass = "line"
+        @klassmid = "mid-line"    
+        @klassthin = "thin-line"    
         @data = {}
         @toggle = -> 
           @selected = !@selected
-          @klass = "line " + if @selected then " opaque" else ""         
+          @klass  = "line " + if @selected then " opaque" else ""
         @x1 = 0
         @y1 = 0
         @x2 = 0

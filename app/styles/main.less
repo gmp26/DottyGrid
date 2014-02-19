@@ -36,17 +36,30 @@ svg {
 }
 
 .line {
-    stroke: @brand-primary;
+    stroke: darken(@brand-primary, 20%);
     stroke-width: 10;
+    stroke-linecap: round;
+    stroke-opacity: 1;
+}
+.mid-line {
+    stroke: lighten(@brand-primary, 0%);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-opacity: 1;
+}
+.thin-line {
+    stroke: lighten(@brand-primary, 20%);
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-opacity: 1;
 }
 
 .polygon {
     fill: darken(@brand-success, 30%);
-    fill-opacity:1;
+    fill-opacity:0.8;
     stroke: #555;
     stroke-width:5;
+    stroke-opacity:1
 }
 .camera {
     stroke: @brand-info;
@@ -85,6 +98,10 @@ svg {
 .dotty-grid {
   display:inline-block;
   vertical-align: top;
+}
+
+.fa {
+  font-size: 180%;
 }
 
 

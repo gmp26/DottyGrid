@@ -13,33 +13,14 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
   # define the toolset
   .factory 'toolset', <[constants]> ++ (constants) -> [
 
-    # * id: 'line'
-    #   icon: 'pencil'
-    #   label: 'Draw line'
-    #   type: 'primary'
-    #   enabled: true
-
-    # * id: 'poly'
-    #   icon: 'pencil-square-o'
-    #   label: 'Draw shape'
-    #   type: 'success'
-    #   enabled: true
-    #   active: "btn-lg"
-
-    * id: 'camera'
-      icon: 'sun-o'
-      label: 'Add camera'
-      type: 'info'
-      enabled: true
-      active: ""
-      weight: 3
-    # * id: 'visible'
-    #   icon: constants.eyeOpen
-    #   label: constants.showVis
-    #   type: 'warning'
+    # * id: 'camera'
+    #   icon: 'sun-o'
+    #   label: 'Add camera'
+    #   type: 'info'
     #   enabled: true
     #   active: ""
-    #   weight: 4
+    #   weight: 3
+
     * id:'trash'
       icon: 'trash-o'
       label: 'Delete selected'
@@ -117,7 +98,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
       $scope.visipolys = reject (==void), $scope.cameras.map (.visipol)
 
-    $scope.toolCheck = (tool) ->
+    $scope.toolClick = (tool) ->
 
       $scope.lastTool = find (.id == $scope.currentTool), toolset
 
@@ -129,16 +110,13 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
       if tool.id == 'trash'
         $scope.deleteSelection!
       else
-        # if tool.id == 'visible'
-        #   $scope.toggleVisible tool
-        # else
         for t in $scope.toolset
           t.active = ""
           tool.active = "btn-lg"
           $scope.currentTool = tool.id
 
     # initiall set the current tool to 'poly'
-    $scope.toolCheck find (.id == 'poly'), toolset
+    $scope.toolClick find (.id == 'poly'), toolset
 
     $scope.trace = (col, row) ->
       console.log "(#{col}, #{row})"
@@ -314,7 +292,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
   .directive 'd3', <[]> ++ ->
     restrict: 'A'
     link: (scope, element, attrs) !->
-      console.log "d3 directive"
+      # console.log "d3 directive"
 
       svg = d3.select element.0
 
@@ -322,7 +300,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
         p = [x,y] = d3.mouse element.0
         [c,r] = scope.xy2cr p
         dot = scope.xy2dot p
-        console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
+        # console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 
       d3Click = (event) ->
         trace!
@@ -335,26 +313,8 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
           scope.makeVisibles!
 
           # switch back to previous tool immediately
-          scope.toolCheck scope.lastTool
+          scope.toolClick scope.lastTool
 
         scope.$apply!
 
-
-  #     selecter = ->
-  #       p = d3.mouse element.0
-  #       console.log "polyScope=#{element.scope!$index}"
-  #       pos = scope.xy2cr p
-  #       insideList = scope.polygons.filter (poly) ->
-  #         poly.data.length > 2
-  #         and VisibilityPolygon.inPolygon pos, poly.data.concat!
-  #       for poly in insideList
-  #         poly.selected = !poly.selected
-  #       console.log insideList.length
-
-
-
-      # svg.on "mouseover", trace
       svg.on "click", d3Click
-      # svg.on "mousedown", trace
-      # svg.on "mousemove", trace
-      # svg.on "mouseup", trace
