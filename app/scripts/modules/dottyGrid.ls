@@ -129,7 +129,7 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
     # Dot separation in pixels
     sep = 30
-    scale = 1
+    scale = 0.75
 
     $scope.transform = ->
       return "scale(#{scale})"

@@ -1,2 +1,2 @@
 #!/bin/bash
-rsync -av dist/ gmp26@maths.org:/www/nrich/html/artGallery
+rsync -av dist/ gmp26@maths.org:/www/nrich/html/dottyGrid
