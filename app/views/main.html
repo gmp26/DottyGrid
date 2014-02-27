@@ -1,7 +1,6 @@
 <div ng-controller="dottyGridController">
 
-  <div class="toolControls">
-    <div>
+  <div class="toolControls" >
       <button
         class="btn btn-{{tool.type}} {{tool.active}}"
         style="margin-right:10px;"
@@ -10,9 +9,8 @@
         ng-disabled="{{!tool.enabled}}">
         <i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
       </button>
-    </div>
   </div>
-  
+
 <!--   <div class="picker">
     <i
       class="fa fa-tint btn btn-xs btn-default"
@@ -36,17 +34,6 @@
         ng-attr-points="{{polyPoints(p)}}">
       </polygon>
 
-      <line ng-repeat="line in lines()" ng-attr-class="{{line.klass}}" ng-click="line.toggle()"
-        ng-attr-x1="{{line.x1}}"
-        ng-attr-x2="{{line.x2}}"
-        ng-attr-y1="{{line.y1}}"
-        ng-attr-y2="{{line.y2}}"></line>
-
-      <line ng-repeat="line in lines()" ng-attr-class="{{line.klassmid}}" ng-click="line.toggle()"
-        ng-attr-x1="{{line.x1}}"
-        ng-attr-x2="{{line.x2}}"
-        ng-attr-y1="{{line.y1}}"
-        ng-attr-y2="{{line.y2}}"></line>
 
       <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}" ng-click="line.toggle()"
         ng-attr-x1="{{line.x1}}"
