@@ -8,15 +8,19 @@
 angular.module 'polygons', []
   .factory 'polygonsFactory', ->
 
+    
     class Polygon
+      @n = 0
       ->
         @selected = false
-        @klass = "polygon"
+        @polyfill = "polyfill#{@@n}"
+        @klass = @polyfill
         @data = []
         @ppoints = ""
         @toggle = ->
           @selected = !@selected
-          @klass = "polygon " + if @selected then " opaque" else ""
+          @klass = @polyfill + if @selected then " opaque" else ""
+        @@n := (@@n+1) % 8
 
     do
       polygons: [new Polygon()]
@@ -76,7 +80,7 @@ angular.module 'polygons', []
           dot.active = @polygons.length
           dot.first = polygon.data.length == 1
 
-        @tracePolygons!
+        #@tracePolygons!
 
 
 

@@ -75,6 +75,57 @@ svg {
     stroke-width:5;
     stroke-opacity:0.75
 }
+
+@fill0: #5588dd;
+@fill1: spin(@fill0, 137.5);
+@fill2: spin(@fill1, 137.5);
+@fill3: spin(@fill2, 137.5);
+@fill4: spin(@fill3, 137.5);
+@fill5: spin(@fill4, 137.5);
+@fill6: spin(@fill5, 137.5);
+@fill7: spin(@fill6, 137.5);
+
+.polyfill0 {
+  .polygon();
+  fill: @fill0;
+}
+
+.polyfill1 {
+  .polygon();
+  fill: @fill1;
+}
+
+.polyfill2 {
+  .polygon();
+  fill: @fill2;
+}
+
+.polyfill3 {
+  .polygon();
+  fill: @fill3;
+}
+
+.polyfill4 {
+  .polygon();
+  fill: @fill4;
+}
+
+.polyfill5 {
+  .polygon();
+  fill: @fill5;
+}
+
+.polyfill6 {
+  .polygon();
+  fill: @fill6;
+}
+
+.polyfill7 {
+  .polygon();
+  fill: @fill7;
+}
+
+
 .camera {
     stroke: @brand-info;
     stroke-width: 30;
