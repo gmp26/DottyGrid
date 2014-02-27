@@ -49,6 +49,20 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
 
     console.log "dottyGridController"
 
+    $scope.fills = [
+      'red'
+      'blue'
+      'green'
+      'orange'
+      'purple'
+      'lightblue'
+      'pink'
+      'black'
+      'magenta'
+      'darkcyan'
+    ]
+
+
     $scope.toolset = toolset
 
     plugins = []
