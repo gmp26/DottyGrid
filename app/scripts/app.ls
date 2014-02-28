@@ -1,10 +1,10 @@
 'use strict'
 
-angular.module 'DottyApp' <[ ngRoute mainController]>
+angular.module 'DottyApp' <[ ngRoute ngTouch dottyGrid]>
   .config <[$routeProvider]> ++ ($routeProvider) ->
     $routeProvider.when '/', {
       templateUrl: 'views/main.html'
-      controller: 'MainController'
+      controller: 'dottyGridController'
     }
     .otherwise {
       redirectTo: '/'
