@@ -1,77 +1,55 @@
-<!-- <div ng-controller="dottyGridController">
- -->
-  <div class="toolControls" >
-      <button
-        class="btn btn-{{tool.type}} {{tool.active}}"
-        style="margin-right:10px;"
-        ng-repeat="tool in toolset"
-        ng-click="toolClick(tool)"
-        ng-disabled="{{!tool.enabled}}">
-        <i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
-      </button>
-  </div>
 
-<!--   <div class="picker">
-    <i
-      class="fa fa-tint btn btn-xs btn-default"
-      ng-repeat="fill in fills"
-      ng-click="fillClick(fill)"
-      style="margin-right:0px;color:{{fill}}">
-    </i>    
-  </div> -->
+<div class="toolControls" >
+    <button
+      class="btn btn-{{tool.type}} {{tool.active}}"
+      style="margin-right:10px;"
+      ng-repeat="tool in toolset"
+      ng-click="toolClick(tool)"
+      ng-disabled="{{!tool.enabled}}">
+      <i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
+    </button>
+</div>
 
-  <svg d3
-    class="dotty-grid"
-    ng-attr-height="{{svgHeight()}}"
-    ng-attr-width="{{svgWidth()}}"
-  >
-    <g ng-attr-transform="{{transform()}}">
-      <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}" ng-click="p.toggle()"
-        ng-attr-points="{{p.points}}">
-      </polygon>
+<svg d3
+  class="dotty-grid"
+  ng-attr-height="{{svgHeight()}}"
+  ng-attr-width="{{svgWidth()}}"
+>
+  <g ng-attr-transform="{{transform()}}">
+    <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}" ng-click="p.toggle()"
+      ng-attr-points="{{p.points}}">
+    </polygon>
 
-      <polygon ng-repeat="p in visipolys" ng-attr-class="{{visiClass(p)}}"
-        ng-attr-points="{{polyPoints(p)}}">
-      </polygon>
+    <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}" ng-click="line.toggle()"
+      ng-attr-x1="{{line.x1}}"
+      ng-attr-x2="{{line.x2}}"
+      ng-attr-y1="{{line.y1}}"
+      ng-attr-y2="{{line.y2}}"></line>
 
-
-      <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}" ng-click="line.toggle()"
-        ng-attr-x1="{{line.x1}}"
-        ng-attr-x2="{{line.x2}}"
-        ng-attr-y1="{{line.y1}}"
-        ng-attr-y2="{{line.y2}}"></line>
-
-      <g ng-repeat="row in grid.rows" >
-        <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
-        <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
-        <line ng-repeat="dot in row"
-          ng-attr-x1="{{dot.x}}"
-          ng-attr-x2="{{dot.x}}"
-          ng-attr-y1="{{dot.y}}"
-          ng-attr-y2="{{dot.y}}"
-          ng-class="{smalldot:true}"
-        ></line>
-      </g>
-
-      <g ng-repeat="row in grid.rows" >
-        <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
-        <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
-        <line ng-repeat="dot in row" ng-click="dotClick(dot)"
-          ng-attr-x1="{{dot.x}}"
-          ng-attr-x2="{{dot.x}}"
-          ng-attr-y1="{{dot.y}}"
-          ng-attr-y2="{{dot.y}}"
-          ng-class="classHash(dot)"
-        ></line>
-      </g>
-
-      <line ng-repeat="c in cameras" ng-click="cameraToggle(c)"
-        ng-attr-x1="{{cameraPoints(c, 'x1')}}"
-        ng-attr-x2="{{cameraPoints(c, 'x2')}}"
-        ng-attr-y1="{{cameraPoints(c, 'y1')}}"
-        ng-attr-y2="{{cameraPoints(c, 'y2')}}"
-        ng-class="cameraClass(c)"></line>
+    <g ng-repeat="row in grid.rows" >
+      <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
+      <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
+      <line ng-repeat="dot in row"
+        ng-attr-x1="{{dot.x}}"
+        ng-attr-x2="{{dot.x}}"
+        ng-attr-y1="{{dot.y}}"
+        ng-attr-y2="{{dot.y}}"
+        ng-class="{smalldot:true}"
+      ></line>
     </g>
-  </svg>
 
-<!-- </div> -->
+    <g ng-repeat="row in grid.rows" >
+      <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
+      <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
+      <line ng-repeat="dot in row" ng-click="dotClick(dot)"
+        ng-attr-x1="{{dot.x}}"
+        ng-attr-x2="{{dot.x}}"
+        ng-attr-y1="{{dot.y}}"
+        ng-attr-y2="{{dot.y}}"
+        ng-class="classHash(dot)"
+      ></line>
+    </g>
+
+  </g>
+</svg>
+

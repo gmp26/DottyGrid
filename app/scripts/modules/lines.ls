@@ -62,15 +62,18 @@ angular.module 'lines', []
           line.x2 = @scope.c2x dot.p.0
           line.y2 = @scope.r2y dot.p.1
 
-          dot.first = true
+          dot.lineFirst = true
           @dotA = dot 
         else
           line.data.p2 = dot.p
           line.x2 = @scope.c2x dot.p.0
           line.y2 = @scope.r2y dot.p.1
-          @dotA.first = false
+          @dotA.lineFirst = false
           @dotA = null
         @lines[*-1] = line
+
+      undraw: ->
+        # undraw the last dot drawn
 
 
 

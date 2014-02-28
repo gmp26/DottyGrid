@@ -1,6 +1,6 @@
 'use strict'
 
-{flatten} = require 'prelude-ls'
+{flatten, partition} = require 'prelude-ls'
 
 #
 # simple module that adds polygon drawing
@@ -8,7 +8,6 @@
 angular.module 'polygons', []
   .factory 'polygonsFactory', ->
 
-    
     class Polygon
       @n = 0
       ->
@@ -36,7 +35,9 @@ angular.module 'polygons', []
       count: -> @polygons.length
 
       deleteSelection: ->
-        @polygons = @polygons.filter (polygon) -> !polygon.selected
+        [@polygons, deletions] = partition ((polygon) -> !polygon.selected), @polygons
+        for poly in deletions
+          @closeAllDots poly
         if @polygons.length == 0
           @polygons = [new Polygon()]
         @polygons.length
@@ -57,11 +58,18 @@ angular.module 'polygons', []
         poly.points = (flatten screenPoints).join " "
         poly
 
+      closeAllDots: (poly) ->
+        for dotColRow in poly.data
+          dot = @scope.grid.rows[dotColRow.1][dotColRow.0]
+          dot.active = false
+          dot.polyFirst = false
+        poly
+
       draw: (dot) ->
         polygon = @polygons[*-1]
 
         if dot.active
-          if !dot.first
+          if !dot.polyFirst
             return
 
           # close polygon and save in polygons array
@@ -70,7 +78,8 @@ angular.module 'polygons', []
           else
             polygon.data = []
             polygon.points = ""
-          @scope.closeAllDots!
+          @closeAllDots polygon
+
         else
           # append dot to current polygon
           if dot.active
@@ -78,9 +87,16 @@ angular.module 'polygons', []
           polygon.data[*] = dot.p
           @setPoints polygon
           dot.active = @polygons.length
-          dot.first = polygon.data.length == 1
+          dot.polyFirst = polygon.data.length == 1
 
-        #@tracePolygons!
+      undraw: ->
+        # undraw the last dot
+
+      loseFocus: ->
+        # will be called when the polygon tool is deselected
+        for poly in @polygons
+          @closeAllDots poly
+
 
 
 

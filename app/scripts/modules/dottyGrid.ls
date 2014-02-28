@@ -2,24 +2,10 @@
 
 {any, empty, filter, find, flatten, reject, sort-by, tail} = require 'prelude-ls'
 
-angular.module 'dottyGrid' <[visibility lines polygons]>
-
-  .constant 'constants' do
-    showVis: 'Show visible'
-    hideVis: 'Hide visible'
-    eyeOpen: 'eye'
-    eyeClose: 'eye-slash'
+angular.module 'dottyGrid' <[lines polygons]>
 
   # define the toolset
-  .factory 'toolset', <[constants]> ++ (constants) -> [
-
-    # * id: 'camera'
-    #   icon: 'sun-o'
-    #   label: 'Add camera'
-    #   type: 'info'
-    #   enabled: true
-    #   active: ""
-    #   weight: 3
+  .factory 'toolset', -> [
 
     * id:'trash'
       icon: 'trash-o'
@@ -36,15 +22,11 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
     toolset
     linesFactory
     polygonsFactory
-    constants
-    VisibilityPolygon
   ]> ++ (
     $scope,
     toolset,
     linesFactory,
-    polygonsFactory,
-    constants,
-    VisibilityPolygon
+    polygonsFactory
   ) ->
 
     console.log "dottyGridController"
@@ -90,27 +72,9 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
     installPlugin linesFactory, 'lines'
     $scope.toolset = sort-by (.weight), toolset
 
-    $scope.VisibilityPolygon = VisibilityPolygon
-
     $scope.deleteSelection = ->
       # delegate to deletion hooks
       plugins.map (.deleteSelection!)
-
-      # for plugin in plugins
-      #   plugin.deleteSelection!
-
-      remove = reject (.selected)
-      $scope.cameras = remove $scope.cameras
-
-      # if we deleted a containing polygon of a camera, make sure
-      # we also delete that camera's visipols
-      for camera in $scope.cameras
-        unless any ((p)->p == camera.poly), $scope.polygons!
-          $scope.visipolys = reject ((v)->v == camera.visipol), $scope.visipolys
-          delete camera.poly
-          delete camera.visipol
-
-      $scope.visipolys = reject (==void), $scope.cameras.map (.visipol)
 
     $scope.toolClick = (tool) ->
 
@@ -211,42 +175,17 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
     $scope.classHash = (dot) -> do
       circle: true
       lit: dot.first
+      "line-lit": dot.lineFirst
+      "poly-lit": dot.polyFirst
 
-    $scope.closeAllDots = ->
-      for rowIndex from 0 til rowCount
-        row = $scope.grid.rows[rowIndex]
-        for colIndex from 0 til colCount
-          dot = row[colIndex]
-          dot.active = false
-          dot.first = false
-
-    $scope.cameras = []
-
-    $scope.cameraDraw = (dot) ->
-      $scope.cameras[*] =
-        data: dot.p
-
-
-    $scope.cameraPoints = (c, component) ->
-      p = c.data
-      switch component
-      | 'x1' => $scope.c2x p.0
-      | 'y1' => $scope.r2y p.1
-      | 'x2' => $scope.c2x p.0
-      | 'y2' => $scope.r2y p.1
+    $scope.commandStack = []
 
     $scope.dotClick = (dot) ->
       for plugin in plugins
         if $scope.currentTool == plugin.tool.id && plugin.draw
           plugin.draw dot
-          $scope.makeVisibles!
+          $scope.commandStack[*] = {action: plugin.draw, params: dot, undo:plugin.undraw}
           return
-
-      # if $scope.currentTool == 'camera'
-      #   $scope.cameraDraw dot
-
-      $scope.makeVisibles!
-
 
     $scope.polyPoints = (p) ->
       screenPoints = p.data.map $scope.cr2xy
@@ -255,53 +194,9 @@ angular.module 'dottyGrid' <[visibility lines polygons]>
     $scope.polyClass = (p) ->
       "polygon " + if p.selected then "opaque" else ""
 
-    $scope.visiClass = (p) ->
-      "visipoly " + if p.selected then "selected" else ""
-
     pointHash = (p) -> "#{p.0.toString 16}#{p.1.toString 16}"
 
-    $scope.cameraClass = (c) ->
-      "camera " + if c.selected then "opaque " else ""
-
     $scope.polyToggle = (p) -> p.selected = !p.selected
-
-    $scope.cameraToggle = (c) ->
-      c.selected = !c.selected
-      if c.visipol
-        c.visipol.selected = c.selected
-
-    $scope.makeVisibles =  ->
-
-      for camera in $scope.cameras
-
-        for p, i in $scope.polygons!
-          internal = VisibilityPolygon.inPolygon camera.data, p.data
-          if typeof! internal is 'Array'
-            # the camera is on the polygon border: adjust so it so is fractionally inside
-            camera.data = internal
-            console.log "adjusted = #{internal}"
-
-          if internal
-            poly = p
-            break
-
-        if internal
-          cm = colCount - 1
-          rm = rowCount - 1
-          console.debug poly.data
-          segments = VisibilityPolygon.convertToSegments [
-            [[0, 0], [cm, 0], [cm, rm], [0, rm]]
-            poly.data
-          ]
-
-          camera.poly = poly
-          camera.visipol =
-            selected: camera.selected
-            data: VisibilityPolygon.compute camera.data, segments
-        else
-          delete camera.visipol
-
-      $scope.visipolys = (filter (.visipol), $scope.cameras).map (.visipol)
 
   .directive 'd3', <[]> ++ ->
     restrict: 'A'
