@@ -45,7 +45,7 @@ angular.module 'polygons', []
       tool:
         id: 'poly'
         icon: 'pencil-square-o'
-        label: 'Draw shape'
+        label: 'Shape'
         type: 'success'
         enabled: true
         weight: 2
@@ -58,9 +58,11 @@ angular.module 'polygons', []
         poly.points = (flatten screenPoints).join " "
         poly
 
+      getDot: (colRow) -> @scope.grid.rows[colRow.1][colRow.0]
+
       closeAllDots: (poly) ->
-        for dotColRow in poly.data
-          dot = @scope.grid.rows[dotColRow.1][dotColRow.0]
+        for colRow in poly.data
+          dot = @getDot colRow
           dot.active = false
           dot.polyFirst = false
         poly
@@ -91,11 +93,29 @@ angular.module 'polygons', []
 
       undraw: ->
         # undraw the last dot
+        console.log "undraw polygon"
 
-      loseFocus: ->
-        # will be called when the polygon tool is deselected
-        for poly in @polygons
-          @closeAllDots poly
+        polygon = @polygons.pop!
+        points = polygon.data
+        if points.length == 0
+          # make the penultimate polygon current
+          polygon = @polygons[*-1]
+          points = polygon.data
+          if points.length > 0
+            (@getDot points.0).polyFirst = true
+            (@getDot points[*-1]).active = true
+        else
+          # remove the last point
+          removed = @getDot points.pop!
+          removed.active = false
+          removed.polyFirst = false
+          if points.length > 0
+            (@getDot points[*-1]).active = true
+          @polygons[*] = polygon
+          @setPoints polygon
+
+
+
 
 
 

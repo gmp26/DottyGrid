@@ -28,6 +28,7 @@ angular.module 'lines', []
         @dotA = null
         @tool.enabled = true
         @scope = scope
+        @lines = []
 
       # setter and getter
       model: -> @lines
@@ -41,7 +42,7 @@ angular.module 'lines', []
       tool:
         id: 'line'
         icon: 'pencil'
-        label: 'Draw line'
+        label: 'Line'
         type: 'primary'
         enabled: true
         weight: 1
@@ -74,6 +75,11 @@ angular.module 'lines', []
 
       undraw: ->
         # undraw the last dot drawn
-
+        console.log "undraw line"
+        if @dotA
+          @dotA.lineFirst = false
+          @dotA = null
+        @lines.pop! unless @lines.length == 0
+            
 
 

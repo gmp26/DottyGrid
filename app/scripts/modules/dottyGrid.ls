@@ -14,6 +14,27 @@ angular.module 'dottyGrid' <[lines polygons]>
       enabled: true
       active: ""
       weight: 5
+    * id:'reset'
+      icon: 'bolt'
+      label: 'Clear'
+      type: 'default'
+      enabled: true
+      active: ""
+      weight: 6
+    * id:'undo'
+      icon: 'reply'
+      label: 'Undo'
+      type: 'info'
+      enabled: true
+      active: ""
+      weight: 7
+    # * id:'link'
+    #   icon: 'chain'
+    #   label: 'Link'
+    #   type: 'link'
+    #   enabled: true
+    #   active: ""
+    #   weight: 8
   ]
 
   .controller 'dottyGridController',
@@ -44,6 +65,8 @@ angular.module 'dottyGrid' <[lines polygons]>
       'darkcyan'
     ]
 
+    # for the undo and link buttons
+    $scope.commandStack = []
 
     $scope.toolset = toolset
 
@@ -63,6 +86,7 @@ angular.module 'dottyGrid' <[lines polygons]>
         # select the tool button as currentTool, making it large, and the rest normal
         plugin.tool.active = ""
         $scope.currentTool = tool.id
+        $scope.currentPlugin = plugin
         for t in $scope.toolset
           t.active = ""
         tool.active = "btn-lg"
@@ -76,6 +100,17 @@ angular.module 'dottyGrid' <[lines polygons]>
       # delegate to deletion hooks
       plugins.map (.deleteSelection!)
 
+    $scope.clearAll = ->
+      console.log "clear all"
+      for plugin in plugins
+        plugin.init $scope
+
+    $scope.undo = ->
+      console.log "undo"
+      if $scope.commandStack.length > 0
+        lastCommand = $scope.commandStack.pop!
+        lastCommand.undo.apply lastCommand.params.0, (tail lastCommand.params)
+
     $scope.toolClick = (tool) ->
 
       $scope.lastTool = find (.id == $scope.currentTool), toolset
@@ -87,6 +122,11 @@ angular.module 'dottyGrid' <[lines polygons]>
 
       if tool.id == 'trash'
         $scope.deleteSelection!
+      else if tool.id == 'reset'
+        $scope.clearAll!
+      else if tool.id == 'undo'
+        $scope.undo!
+
       else
         for t in $scope.toolset
           t.active = ""
@@ -178,13 +218,11 @@ angular.module 'dottyGrid' <[lines polygons]>
       "line-lit": dot.lineFirst
       "poly-lit": dot.polyFirst
 
-    $scope.commandStack = []
-
     $scope.dotClick = (dot) ->
       for plugin in plugins
         if $scope.currentTool == plugin.tool.id && plugin.draw
           plugin.draw dot
-          $scope.commandStack[*] = {action: plugin.draw, params: dot, undo:plugin.undraw}
+          $scope.commandStack[*] = {action: plugin.draw, params: [plugin, dot], undo:plugin.undraw}
           return
 
     $scope.polyPoints = (p) ->
