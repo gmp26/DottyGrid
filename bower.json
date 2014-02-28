@@ -9,7 +9,8 @@
     "angular-ui-bootstrap-bower": "~0.10.0",
     "es5-shim": "~2.0.8",
     "d3": "~3.4.1",
-    "prelude-ls": "~1.0.3"
+    "prelude-ls": "~1.0.3",
+    "angular-touch": "~1.2.13"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",

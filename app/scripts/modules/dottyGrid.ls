@@ -102,6 +102,7 @@ angular.module 'dottyGrid' <[lines polygons]>
 
     $scope.clearAll = ->
       console.log "clear all"
+      $scope.commandStack = []
       for plugin in plugins
         plugin.init $scope
 
