@@ -1,13 +1,26 @@
 
 <div class="toolControls" >
+    <div class="btn-group">
+      <button
+        class="btn btn-default btn-sm"
+        ng-repeat="tool in playerTools"
+        ng-click="toolClick(tool)"
+        ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
+    </div>
     <button
       class="btn btn-{{tool.type}} {{tool.active}}"
-      style="margin-right:10px;"
-      ng-repeat="tool in toolset"
+        popover-placement="bottom" popover="{{tool.tip}}" popover-trigger="mouseenter"
+      style="margin-right:5px;"
+      ng-repeat="tool in drawTools"
       ng-click="toolClick(tool)"
-      ng-disabled="{{!tool.enabled}}">
-      <i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
-    </button>
+      ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
+    <div class="btn-group">
+      <button
+        class="btn btn-default btn-sm"
+        ng-repeat="tool in undoTools"
+        ng-click="toolClick(tool)"
+        ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
+    </div>
 </div>
 
 <svg d3

@@ -35,6 +35,7 @@ svg {
     opacity:0.2;
     stroke-width:25;
     stroke: #888;
+    stroke-linecap: round;
 }
 .circle:hover {
     //stroke-width:12;
@@ -51,12 +52,18 @@ svg {
 .circle.line-lit {
   stroke: @brand-primary;
   stroke-width:30;
-  opacity:1;
+  opacity:0.8;
 }
 .circle.poly-lit {
   stroke: @brand-success;
   stroke-width:30;
-  opacity:1;
+  opacity:0.8;
+}
+
+.circle.poly-open {
+  stroke: @brand-warning;
+  stroke-width:30;
+  opacity:0.8;
 }
 
 
@@ -171,7 +178,7 @@ svg {
 }
 
 .fa {
-  font-size: 180%;
+  font-size: 100%;
 }
 
 

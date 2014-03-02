@@ -44,6 +44,7 @@ angular.module 'lines', []
         icon: 'pencil'
         label: 'Line'
         type: 'primary'
+        tip: 'Click on 2 dots to draw a line'
         enabled: true
         weight: 1
 

@@ -47,6 +47,7 @@ angular.module 'polygons', []
         icon: 'pencil-square-o'
         label: 'Shape'
         type: 'success'
+        tip: 'Click dots to draw a shape. Finish by clicking back on the green dot'
         enabled: true
         weight: 2
 
@@ -58,13 +59,12 @@ angular.module 'polygons', []
         poly.points = (flatten screenPoints).join " "
         poly
 
-      getDot: (colRow) -> @scope.grid.rows[colRow.1][colRow.0]
-
       closeAllDots: (poly) ->
         for colRow in poly.data
-          dot = @getDot colRow
+          dot = @scope.getDot colRow
           dot.active = false
           dot.polyFirst = false
+          dot.polyLast = false
         poly
 
       draw: (dot) ->
@@ -89,6 +89,10 @@ angular.module 'polygons', []
           polygon.data[*] = dot.p
           @setPoints polygon
           dot.active = @polygons.length
+          if polygon.data.length > 1
+            lastDot = @scope.getDot polygon.data[*-2]
+            lastDot.polyLast = false
+          dot.polyLast = true
           dot.polyFirst = polygon.data.length == 1
 
       undraw: ->
@@ -99,20 +103,31 @@ angular.module 'polygons', []
         points = polygon.data
         if points.length == 0
           # make the penultimate polygon current
-          polygon = @polygons[*-1]
-          points = polygon.data
-          if points.length > 0
-            (@getDot points.0).polyFirst = true
-            (@getDot points[*-1]).active = true
+          if @polygons.length > 0
+            polygon = @polygons[*-1]
+            points = polygon.data
+            if points.length > 0
+              (@scope.getDot points.0).polyFirst = true
+              for p, n in points
+                (@scope.getDot p).active = true #if n > 0
+              (@scope.getDot points[*-1]).polyLast = true
+          else
+            @polygons[*] = polygon
         else
-          # remove the last point
-          removed = @getDot points.pop!
-          removed.active = false
-          removed.polyFirst = false
+          # remove the last point in the current polygon
+          @scope.getDot points.pop!
+            ..active = false
+            ..polyFirst = false
+            ..polyLast = false
           if points.length > 0
-            (@getDot points[*-1]).active = true
+            (@scope.getDot points[*-1])
+              ..active = true
+              ..polyLast = true
+            # @scope.getDot points.0
+            #   ..active = true
+            #   ..polyFirst = true
           @polygons[*] = polygon
-          @setPoints polygon
+        @setPoints polygon
 
 
 
