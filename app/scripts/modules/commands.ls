@@ -4,7 +4,7 @@
 # provides undoable and redoable commands
 #
 angular.module 'commandStore', []
-  .factory 'commandStoreFactory', <[$timeout]> ++ ($timeout) ->
+  .factory 'commandStore', <[$timeout]> ++ ($timeout) ->
 
     class Command
       (thisObj, action, params, undo) ->

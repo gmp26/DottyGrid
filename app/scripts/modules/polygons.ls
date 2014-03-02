@@ -6,7 +6,7 @@
 # simple module that adds polygon drawing
 #
 angular.module 'polygons', []
-  .factory 'polygonsFactory', ->
+  .factory 'polygonsFactory', <[trash commandStore]> ++ (trash, commandStore) ->
 
     class Polygon
       @n = 0
@@ -34,13 +34,39 @@ angular.module 'polygons', []
 
       count: -> @polygons.length
 
-      deleteSelection: ->
+      # remove: ->
+      #   [@lines, binned] = partition ((line) -> !line.selected), @lines
+      #   trash.binit commandStore.pointer, binned
+      #   console.log "binning id=#{commandStore.pointer}"
+
+      # TODO: This will fail if both lines and polygons are in the selection. 
+      remove: ->
         [@polygons, deletions] = partition ((polygon) -> !polygon.selected), @polygons
-        for poly in deletions
-          @closeAllDots poly
-        if @polygons.length == 0
-          @polygons = [new Polygon()]
-        @polygons.length
+        if deletions.length > 0
+          trash.binit "poly#{commandStore.pointer}", deletions
+          console.log "binning id=poly#{commandStore.pointer}"
+          for poly in deletions
+            @closeAllDots poly
+          if @polygons.length == 0
+            @polygons = [new Polygon()]
+          @polygons.length
+
+      restore: ->
+        id = "poly#{commandStore.pointer + 1}"
+        console.log "poly restoring id=poly#{id}"
+        polygons = trash.unbin id
+        if polygons?
+          for polygon in polygons
+            polygon.selected = true
+          if polygons && polygons.length > 0
+            @polygons = polygons ++ @polygons
+
+      deleteSelection: -> {
+        thisObj:@
+        action: @remove
+        params: null
+        undo: @restore
+      }
 
       tool:
         id: 'poly'

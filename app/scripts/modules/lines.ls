@@ -3,11 +3,13 @@
 #
 # simple module that adds line drawing
 #
-angular.module 'lines', []
-  .factory 'linesFactory', -> 
+angular.module 'lines', <[trash commandStore]>
+  .factory 'linesFactory', <[trash commandStore]> ++ (trash, commandStore) ->
+
+    {partition} = require 'prelude-ls'
 
     class Line
-      (lines) -> 
+      (lines) ->
         @selected = false
         @klass = "line"
         @klassmid = "mid-line"    
@@ -16,6 +18,8 @@ angular.module 'lines', []
         @toggle = -> 
           @selected = !@selected
           @klassthin  = "thin-line " + if @selected then " opaque" else ""
+        # @toggle = ->
+        #   commandStore.newdo @, @doToggle, null, @doToggle
         @x1 = 0
         @y1 = 0
         @x2 = 0
@@ -24,6 +28,10 @@ angular.module 'lines', []
     do
       lines: []
 
+
+      #
+      # Bit of a code smell -- injecting scope in an initialiser
+      #
       init: (scope) ->
         @dotA = null
         @tool.enabled = true
@@ -35,9 +43,29 @@ angular.module 'lines', []
 
       count: -> @lines.length
 
-      deleteSelection: ->
-        @lines = @lines.filter (line) -> !line.selected
-        @lines.length
+      remove: ->
+        [@lines, binned] = partition ((line) -> !line.selected), @lines
+        if binned.length > 0
+          trash.binit "lines#{commandStore.pointer}", binned
+          console.log "binning id=lines#{commandStore.pointer}"
+
+      restore: ->
+        id = "lines#{commandStore.pointer + 1}"
+        console.log "line restoring id=#{id}"
+        lines = trash.unbin id
+        if lines?
+          for line in lines
+            line.selected = true
+          if lines && lines.length > 0
+            @lines = lines ++ @lines
+
+      deleteSelection: -> {
+        thisObj:@
+        action: @remove
+        params: null
+        undo: @restore
+      }
+
 
       tool:
         id: 'line'
@@ -80,7 +108,15 @@ angular.module 'lines', []
         if @dotA
           @dotA.lineFirst = false
           @dotA = null
-        @lines.pop! unless @lines.length == 0
+          @lines.pop! unless @lines.length == 0
+        else
+          line = @lines[*-1]
+          line.x2 = line.x1
+          line.y2 = line.y1
+          @dotA = @scope.getDot line.data.p1
+          @dotA.lineFirst = true
+          delete line.data.p2
+
             
 
 

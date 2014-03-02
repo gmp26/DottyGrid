@@ -29,11 +29,11 @@
   ng-attr-width="{{svgWidth()}}"
 >
   <g ng-attr-transform="{{transform()}}">
-    <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}" ng-click="p.toggle()"
+    <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}" ng-click="toggle(p)"
       ng-attr-points="{{p.points}}">
     </polygon>
 
-    <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}" ng-click="line.toggle()"
+    <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}" ng-click="toggle(line)"
       ng-attr-x1="{{line.x1}}"
       ng-attr-x2="{{line.x2}}"
       ng-attr-y1="{{line.y1}}"

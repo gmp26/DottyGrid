@@ -12,7 +12,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       label: 'Delete selected'
       tip: 'Click a line or shape to select it, avoiding the dots. Selections show in red'
       type: 'danger'
-      enabled: true
+      enabled: -> true
       active: ""
       weight: 5
     # * id:'reset'
@@ -27,7 +27,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       label: ''
       tip: 'Undo all steps'
       type: 'link'
-      enabled: true
+      enabled: -> true
       active: ""
       weight: 7
     * id:'undo'
@@ -35,7 +35,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       label: 'undo'
       tip: 'Undo one step'
       type: 'link'
-      enabled: true
+      enabled: -> true
       active: ""
       weight: 8
     * id:'stop'
@@ -43,7 +43,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       label: ''
       tip: 'pause'
       type: 'link'
-      enabled: true
+      enabled: -> true
       active: ""
       weight: 9
     * id:'redo'
@@ -51,7 +51,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       label: 'redo'
       type: 'link'
       tip: 'Redo one step'
-      enabled: true
+      enabled: -> true
       active: ""
       weight: 10
     * id:'play'
@@ -59,17 +59,17 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       label: ''
       type: 'link'
       tip: 'Redo all steps'
-      enabled: true
+      enabled: -> true
       active: ""
       weight: 11
-    * id:'share'
-      icon: 'share-square-o'
-      label: 'Share'
-      type: 'link'
-      tip: 'Share a link to completed drawing from the address bar'
-      enabled: true
-      active: ""
-      weight: 12
+    # * id:'share'
+    #   icon: 'share-square-o'
+    #   label: 'Share'
+    #   type: 'link'
+    #   tip: 'Share a link to completed drawing from the address bar'
+    #   enabled: -> true
+    #   active: ""
+    #   weight: 12
   ]
 
   .controller 'dottyGridController',
@@ -78,7 +78,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $location
     $routeParams
     $window
-    commandStoreFactory
+    commandStore
     toolset
     linesFactory
     polygonsFactory
@@ -87,7 +87,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $location,
     $routeParams,
     $window,
-    commandStoreFactory,
+    commandStore,
     toolset,
     linesFactory,
     polygonsFactory
@@ -118,7 +118,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       'darkcyan'
     ]
 
-    $scope.commands = commandStoreFactory
+    $scope.commands = commandStore
 
     installPlugin = (plugin, name, active) ->
       plugin.init $scope
@@ -160,15 +160,38 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       step-backward
       step-forward ]>), $scope.playerTools
 
+    for tool in $scope.drawTools
+      if tool.id == 'trash'
+        break
+
+    cmds = $scope.commands
     for tool in $scope.toolset
-      if tool.icon == 'pause'
-        tool.enabled = -> !$scope.commands.stopped
-      else
-        tool.enabled = -> $scope.commands.stopped
+      tool.enabled =
+        switch tool.icon
+        | 'pause' => -> !cmds.stopped
+        | 'step-backward', 'fast-backward' => -> cmds.stopped && cmds.pointer > 0
+        | 'step-forward', 'fast-forward'  => -> cmds.stopped && cmds.pointer < cmds.stack.length
+        | 'trash-o' => ->
+          for polygon in $scope.polygons!
+            if polygon.selected
+              return true
+          for line in $scope.lines!
+            if line.selected
+              return true
+          return false
+        | otherwise  => -> cmds.stopped
 
     $scope.deleteSelection = ->
       # delegate to deletion hooks
-      $scope.plugins.map (.deleteSelection!)
+      newdos = $scope.plugins.map (.deleteSelection!)
+      thisObj =
+        action: -> for newdo in newdos
+          newdo.action.call newdo.thisObj
+        undo: -> for newdo in newdos
+          newdo.undo.call newdo.thisObj
+
+      commandStore.newdo thisObj, thisObj.action, 'delete', thisObj.undo
+      $scope.selectionIsEmpty = true
 
     $scope.clearAll = ->
       console.log "clear all"
@@ -176,11 +199,6 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       $scope.commands.clear!
       for plugin in $scope.plugins
         plugin.init $scope
-
-    $scope.undo = ->
-      # if $scope.commandStack.length > 0
-      #   lastCommand = $scope.commandStack.pop!
-      #   lastCommand.undo.apply lastCommand.params.0, (tail lastCommand.params)
 
     $scope.toolClick = (tool) ->
 
@@ -298,28 +316,28 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       "poly-lit": dot.polyFirst
       "poly-open": dot.polyLast && !dot.polyFirst
 
-    # $scope.record = (action, params, undo) ->
-    #   $scope.commandStack[*] = {action: action, params: params, undo: undo}
-
     $scope.dotClick = (dot) ->
       for plugin in $scope.plugins
         if $scope.currentTool == plugin.tool.id && plugin.draw
           #plugin.draw dot
           $scope.commands.newdo plugin, plugin.draw, dot, plugin.undraw
-          # $scope.record plugin.draw, [plugin, dot], plugin.undraw
           console.log $scope.getUrl!
           return
 
-    # $scope.getUrl = -> (for command in $scope.commandStack
-    #   plugin = command.params.0
-    #   dot = command.params.1
-    #   "#{plugin.index}-#{dot.p.0}-#{dot.p.1}").join '!'
+    # delegate click on object to the object, but stack the command on the way
+    $scope.toggle = (object) ->
+      commandStore.newdo object, object.toggle, null, object.toggle
 
-    $scope.getUrl = ->
+    $scope.getUrl = -> 
       (for command in $scope.commands.stack
-        plugin = command.thisObj
-        dot = command.params
-        "#{plugin.index}-#{dot.p.0}-#{dot.p.1}"
+        if command.params == 'delete'
+          'D'
+        else if command.params
+          plugin = command.thisObj
+          dot = command.params
+          "#{plugin.index}-#{dot.p.0}-#{dot.p.1}"
+        else
+          'S'
       ) * '!'
 
     $scope.polyPoints = (p) ->
@@ -331,12 +349,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
     pointHash = (p) -> "#{p.0.toString 16}#{p.1.toString 16}"
 
-    $scope.polyToggle = (p) -> p.selected = !p.selected
-
     $scope.getDot = (colRow) -> $scope.grid.rows[colRow.1][colRow.0]
 
     $scope.reset = !->
-
       if $routeParams.cmds
         for cmd in ($routeParams.cmds.split '!')
           [index, c, r] = cmd.split '-'
