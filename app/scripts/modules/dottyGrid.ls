@@ -7,14 +7,14 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
   # define the toolset
   .factory 'toolset', -> [
 
-    * id:'trash'
-      icon: 'trash-o'
-      label: 'Delete selected'
-      tip: 'Click a line or shape to select it, avoiding the dots. Selections show in red'
-      type: 'danger'
-      enabled: -> true
-      active: ""
-      weight: 5
+    # * id:'trash'
+    #   icon: 'trash-o'
+    #   label: 'Delete selected'
+    #   tip: 'Click a line or shape to select it, avoiding the dots. Selections show in red'
+    #   type: 'danger'
+    #   enabled: -> true
+    #   active: ""
+    #   weight: 5
     # * id:'reset'
     #   icon: 'bolt'
     #   label: 'Clear'
