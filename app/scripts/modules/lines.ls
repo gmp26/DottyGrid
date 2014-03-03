@@ -9,7 +9,9 @@ angular.module 'lines', <[trash commandStore]>
     {partition} = require 'prelude-ls'
 
     class Line
-      (lines) ->
+      @id = 0
+      ->
+        @id = "line#{++@@id}"
         @selected = false
         @klass = "line"
         @klassmid = "mid-line"    
@@ -34,7 +36,7 @@ angular.module 'lines', <[trash commandStore]>
       #
       init: (scope) ->
         @dotA = null
-        @tool.enabled = true
+        @tool.enabled = -> true
         @scope = scope
         @lines = []
 
@@ -48,16 +50,20 @@ angular.module 'lines', <[trash commandStore]>
         if binned.length > 0
           trash.binit "lines#{commandStore.pointer}", binned
           console.log "binning id=lines#{commandStore.pointer}"
+          for line in binned
+            console.log "removing #{@line.id}"
 
       restore: ->
         id = "lines#{commandStore.pointer + 1}"
-        console.log "line restoring id=#{id}"
         lines = trash.unbin id
         if lines?
           for line in lines
             line.selected = true
+            console.log "restoring #{@line.id}"
           if lines && lines.length > 0
             @lines = lines ++ @lines
+        else
+          console.log "no lines to restore"
 
       deleteSelection: -> {
         thisObj:@
@@ -82,7 +88,7 @@ angular.module 'lines', <[trash commandStore]>
         if @lines.length > 0 && !@lines[*-1].data.p2?
           line = @lines[*-1]
         else
-          line = new Line(this)
+          line = new Line!
           @lines[*] = line
 
         if !@dotA

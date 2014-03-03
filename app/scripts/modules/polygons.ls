@@ -1,16 +1,18 @@
 'use strict'
 
-{flatten, partition} = require 'prelude-ls'
-
 #
 # simple module that adds polygon drawing
 #
+{flatten, partition} = require 'prelude-ls'
+
 angular.module 'polygons', []
   .factory 'polygonsFactory', <[trash commandStore]> ++ (trash, commandStore) ->
 
     class Polygon
       @n = 0
+      @id = 0
       ->
+        @id = "poly#{++@@id}"
         @selected = false
         @polyfill = "polyfill#{@@n}"
         @klass = @polyfill
@@ -26,7 +28,7 @@ angular.module 'polygons', []
 
       init: (scope) ->
         @polygons = [new Polygon()]
-        @tool.enabled = true
+        @tool.enabled = -> true
         @scope = scope
 
       # setter and getter
@@ -40,26 +42,30 @@ angular.module 'polygons', []
       #   console.log "binning id=#{commandStore.pointer}"
 
       # TODO: This will fail if both lines and polygons are in the selection. 
-      remove: ->
+      remove: !->
         [@polygons, deletions] = partition ((polygon) -> !polygon.selected), @polygons
         if deletions.length > 0
           trash.binit "poly#{commandStore.pointer}", deletions
           console.log "binning id=poly#{commandStore.pointer}"
           for poly in deletions
             @closeAllDots poly
+            console.log "removing #{poly.id}"
           if @polygons.length == 0
             @polygons = [new Polygon()]
-          @polygons.length
+            console.log "new empty poly #{@polygons.0.id}"
+
 
       restore: ->
         id = "poly#{commandStore.pointer + 1}"
-        console.log "poly restoring id=poly#{id}"
         polygons = trash.unbin id
         if polygons?
           for polygon in polygons
             polygon.selected = true
+            console.log "restoring #{polygon.id}"
           if polygons && polygons.length > 0
             @polygons = polygons ++ @polygons
+        else
+          console.log "no polygons restored"
 
       deleteSelection: -> {
         thisObj:@
@@ -149,9 +155,6 @@ angular.module 'polygons', []
             (@scope.getDot points[*-1])
               ..active = true
               ..polyLast = true
-            # @scope.getDot points.0
-            #   ..active = true
-            #   ..polyFirst = true
           @polygons[*] = polygon
         @setPoints polygon
 

@@ -326,6 +326,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
     # delegate click on object to the object, but stack the command on the way
     $scope.toggle = (object) ->
+      console.log "toggle #{object.id}"
       commandStore.newdo object, object.toggle, null, object.toggle
 
     $scope.getUrl = -> 
