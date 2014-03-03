@@ -1,8 +1,5 @@
 'use strict'
 
-#
-# simple module that adds line drawing
-#
 angular.module 'trash', []
   .factory 'trash', -> 
 
