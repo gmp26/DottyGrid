@@ -62,14 +62,6 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       enabled: -> true
       active: ""
       weight: 11
-    # * id:'share'
-    #   icon: 'share-square-o'
-    #   label: 'Share'
-    #   type: 'link'
-    #   tip: 'Share a link to completed drawing from the address bar'
-    #   enabled: -> true
-    #   active: ""
-    #   weight: 12
   ]
 
   .controller 'dottyGridController',
@@ -77,7 +69,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $scope
     $location
     $routeParams
-    $window
+    $timeout
     commandStore
     toolset
     linesFactory
@@ -86,7 +78,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $scope,
     $location,
     $routeParams,
-    $window,
+    $timeout,
     commandStore,
     toolset,
     linesFactory,
@@ -103,7 +95,12 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     sep = 30
     scale = 0.75
 
-    console.log "dottyGridController"
+    # console.log "dottyGridController"
+
+    app = $routeParams.app?.toString!toLowerCase!
+    $scope.id = ~~$routeParams.id || 10791
+    $scope.backLink = "http://nrich.maths.org/#{$scope.id}"
+    $scope.fullScreen = (app and app != "0" and app != "false")
 
     $scope.fills = [
       'red'
@@ -130,7 +127,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       $scope.toolset[*] = plugin.tool
       $scope[name] = -> plugin.model!
       if active
-        plugin.tool.active = "btn-lg"
+        plugin.tool.active = "btn"
 
       # install default tool button action
       plugin.toolAction ?= (tool) ->
@@ -138,10 +135,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         plugin.tool.active = ""
         $scope.currentTool = tool.id
         $scope.currentPlugin = plugin
-        for t in $scope.toolset
-          t.active = "btn-sm"
+        for p in $scope.plugins
+          p.tool.active = "btn-sm"
         tool.active = "btn"
-        true
 
     installPlugin polygonsFactory, 'polygons', true
     installPlugin linesFactory, 'lines'
@@ -193,12 +189,16 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       commandStore.newdo thisObj, thisObj.action, 'delete', thisObj.undo
       $scope.selectionIsEmpty = true
 
-    $scope.clearAll = ->
+    $scope.reset = ->
       console.log "clear all"
       #$scope.commandStack = []
+      $scope.makeGrid!
       $scope.commands.clear!
+      $scope.currentTool = 'poly'
+      $scope.toolset = toolset.concat!
       for plugin in $scope.plugins
         plugin.init $scope
+
 
     $scope.toolClick = (tool) ->
 
@@ -212,35 +212,29 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       if tool.id == 'trash'
         $scope.deleteSelection!
       else if tool.id == 'reset'
-        $scope.clearAll!
+        $scope.reset!
       else if tool.id == 'rewind'
-        console.log "rewind"
+        # console.log "rewind"
         $scope.commands.rewind!
       else if tool.id == 'undo'
-        console.log "undo"
+        # console.log "undo"
         $scope.commands.undo!
       else if tool.id == 'stop'
-        console.log "stop"
+        # console.log "stop"
         $scope.commands.stop!
       else if tool.id == 'play'
-        console.log "play"
+        # console.log "play"
         $scope.commands.play!
       else if tool.id == 'redo'
-        console.log "redo"
+        # console.log "redo"
         $scope.commands.redo!
-      else if tool.id == 'link'
-        url = '#/'+$scope.getUrl!
-        $scope.clearAll!
-        $scope.toolset = toolset.concat!
-        $location.path url 
-
       else
         for t in $scope.toolset
           t.active = ""
           tool.active = "btn"
           $scope.currentTool = tool.id
 
-    # initiall set the current tool to 'poly'
+    # initially set the current tool to 'poly'
     $scope.toolClick find (.id == 'poly'), $scope.toolset
 
     $scope.trace = (col, row) ->
@@ -298,16 +292,20 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     #
     # dots in the dotty grid
     #
+    $scope.makeGrid = -> 
+      rows = for rowIndex from 0 til rowCount
+        row = for colIndex from 0 til colCount
+          p: [colIndex, rowIndex]
+          x: $scope.c2x colIndex
+          y: $scope.r2y rowIndex
+          first: false
+          active: false
+        row.y = $scope.r2y rowIndex
+        row
 
-    rows = for rowIndex from 0 til rowCount
-      for colIndex from 0 til colCount
-        p: [colIndex, rowIndex]
-        x: $scope.c2x colIndex
-        y: $scope.r2y rowIndex
-        first: false
-        active: false
+      $scope.grid = {rows: rows}
 
-    $scope.grid = {rows: rows}
+    $scope.makeGrid!
 
     $scope.classHash = (dot) -> do
       circle: true
@@ -316,30 +314,53 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       "poly-lit": dot.polyFirst
       "poly-open": dot.polyLast && !dot.polyFirst
 
-    $scope.dotClick = (dot) ->
+    $scope.dotClick = (dot) !->
       for plugin in $scope.plugins
         if $scope.currentTool == plugin.tool.id && plugin.draw
           #plugin.draw dot
           $scope.commands.newdo plugin, plugin.draw, dot, plugin.undraw
-          console.log $scope.getUrl!
+          # console.log $scope.toString!
           return
 
     # delegate click on object to the object, but stack the command on the way
+    #
+    # TODO: Toggle does not play well with undo/redo yet. The problem is that
+    # if an undo deletes a selected object, that object will be recreated on
+    # a future redo. The `thisObject` for the toggle redo will point to the
+    # deleted object rather than the new one.
+    #
+    # Instead of deleting objects, undo/redo should trash them so redo/undo can
+    # restore them from trash rather than recreated.
+    #
     $scope.toggle = (object) ->
-      console.log "toggle #{object.id}"
+      # console.log "toggle #{object.id}"
       commandStore.newdo object, object.toggle, null, object.toggle
 
-    $scope.getUrl = -> 
+    $scope.toString = -> 
       (for command in $scope.commands.stack
         if command.params == 'delete'
-          'D'
+          ''
         else if command.params
           plugin = command.thisObj
           dot = command.params
           "#{plugin.index}-#{dot.p.0}-#{dot.p.1}"
         else
-          'S'
+          ''
       ) * '!'
+
+    $scope.getUrl = -> "http://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app&id=#{$scope.id}"
+
+    $scope.showLink = ->
+      url = $scope.toString!
+      $location.path url
+
+    $scope.mailTo = "secondary.nrich@maths.org"
+    $scope.mailSubject = "My%20dotty%20grid%20drawing"
+
+    console.log "scope.toString! = " + $scope.toString!
+
+    $scope.mailBody = -> "Here's%20my%20drawing.%0A%0Ahttp://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app=1%0A%0A
+    I%20think%20it's%20interesting%20because..."
 
     $scope.polyPoints = (p) ->
       screenPoints = p.data.map $scope.cr2xy
@@ -352,14 +373,15 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
     $scope.getDot = (colRow) -> $scope.grid.rows[colRow.1][colRow.0]
 
-    $scope.reset = !->
-      if $routeParams.cmds
-        for cmd in ($routeParams.cmds.split '!')
-          [index, c, r] = cmd.split '-'
-          plugin = $scope.plugins[index]
-          plugin.draw $scope.getDot [c,r] 
-
-
+    if $routeParams.cmds
+      $scope.reset!
+      for cmd in ($routeParams.cmds.split '!')
+        [index, c, r] = cmd.split '-'
+        plugin = $scope.plugins[index]
+        commandStore.newdo plugin, plugin.draw, ($scope.getDot [c,r]), plugin.undraw, false
+      $timeout (->
+        commandStore.pointer = 0
+        commandStore.play!), 2000
 
   .directive 'd3', <[]> ++ ->
     restrict: 'A'

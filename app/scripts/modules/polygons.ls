@@ -36,23 +36,17 @@ angular.module 'polygons', []
 
       count: -> @polygons.length
 
-      # remove: ->
-      #   [@lines, binned] = partition ((line) -> !line.selected), @lines
-      #   trash.binit commandStore.pointer, binned
-      #   console.log "binning id=#{commandStore.pointer}"
-
-      # TODO: This will fail if both lines and polygons are in the selection. 
       remove: !->
         [@polygons, deletions] = partition ((polygon) -> !polygon.selected), @polygons
         if deletions.length > 0
           trash.binit "poly#{commandStore.pointer}", deletions
-          console.log "binning id=poly#{commandStore.pointer}"
+          # console.log "binning id=poly#{commandStore.pointer}"
           for poly in deletions
             @closeAllDots poly
-            console.log "removing #{poly.id}"
+            # console.log "removing #{poly.id}"
           if @polygons.length == 0
             @polygons = [new Polygon()]
-            console.log "new empty poly #{@polygons.0.id}"
+            # console.log "new empty poly #{@polygons.0.id}"
 
 
       restore: ->
@@ -61,11 +55,11 @@ angular.module 'polygons', []
         if polygons?
           for polygon in polygons
             polygon.selected = true
-            console.log "restoring #{polygon.id}"
+            # console.log "restoring #{polygon.id}"
           if polygons && polygons.length > 0
             @polygons = polygons ++ @polygons
         else
-          console.log "no polygons restored"
+          # console.log "no polygons restored"
 
       deleteSelection: -> {
         thisObj:@
@@ -129,7 +123,7 @@ angular.module 'polygons', []
 
       undraw: ->
         # undraw the last dot
-        console.log "undraw polygon"
+        # console.log "undraw polygon"
 
         polygon = @polygons.pop!
         points = polygon.data

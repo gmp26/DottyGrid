@@ -54,18 +54,19 @@ angular.module 'commandStore', []
 
 
         # add the new command, making it the last entry on the stack
-        @newdo = (thisObj, action, params, undo) !~>
+        @newdo = (thisObj, action, params, undo, exec=true) !~>
           cmd = new Command thisObj, action, params, undo
           @stack[@pointer] = cmd
           @stack.length = ++@pointer
-          cmd.exec!
+          if exec
+            cmd.exec!
 
         # undo the last action; keeping it on the stack in case of a future redo
         @undo = !~>
           if @pointer > 0
             cmd = @stack[@pointer = @pointer - 1]
             cmd.unexec!
-          console.log "pointer = #{@pointer}"
+          # console.log "pointer = #{@pointer}"
 
         # redo the last undo if there was one 
         @redo = !~>
@@ -73,6 +74,6 @@ angular.module 'commandStore', []
             cmd = @stack[@pointer]
             @pointer = Math.min @stack.length, (@pointer+1)
             cmd.exec!
-          console.log "pointer = #{@pointer}"
+          # console.log "pointer = #{@pointer}"
 
     new CommandStore!

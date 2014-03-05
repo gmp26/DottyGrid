@@ -49,9 +49,9 @@ angular.module 'lines', <[trash commandStore]>
         [@lines, binned] = partition ((line) -> !line.selected), @lines
         if binned.length > 0
           trash.binit "lines#{commandStore.pointer}", binned
-          console.log "binning id=lines#{commandStore.pointer}"
-          for line in binned
-            console.log "removing #{@line.id}"
+          # console.log "binning id=lines#{commandStore.pointer}"
+          # for line in binned
+          # console.log "removing #{@line.id}"
 
       restore: ->
         id = "lines#{commandStore.pointer + 1}"
@@ -59,11 +59,11 @@ angular.module 'lines', <[trash commandStore]>
         if lines?
           for line in lines
             line.selected = true
-            console.log "restoring #{@line.id}"
+            # console.log "restoring #{@line.id}"
           if lines && lines.length > 0
             @lines = lines ++ @lines
         else
-          console.log "no lines to restore"
+          # console.log "no lines to restore"
 
       deleteSelection: -> {
         thisObj:@

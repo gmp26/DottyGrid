@@ -1,19 +1,24 @@
 
 <div class="toolControls" >
-    <div class="btn-group">
+    <div class="btn-group"
+      popover-placement="bottom" popover="Playback drawing" popover-trigger="mouseenter">
       <button
         class="btn btn-default btn-sm"
         ng-repeat="tool in playerTools"
         ng-click="toolClick(tool)"
-        ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
+        ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
+      </button>
     </div>
+
     <button
       class="btn btn-{{tool.type}} {{tool.active}}"
-        popover-placement="bottom" popover="{{tool.tip}}" popover-trigger="mouseenter"
+      popover-placement="bottom" popover="{{tool.tip}}" popover-trigger="mouseenter"
       style="margin-right:5px;"
       ng-repeat="tool in drawTools"
       ng-click="toolClick(tool)"
-      ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
+      ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}
+    </button>
+
     <div class="btn-group">
       <button
         class="btn btn-default btn-sm"
@@ -21,6 +26,32 @@
         ng-click="toolClick(tool)"
         ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
     </div>
+    
+    <span ng-show="fullScreen">
+      <a href="mailto:{{mailTo}}?subject={{mailSubject}}&amp;body={{mailBody()}}"
+          class="btn btn-link btn-sm"
+          popover-placement="bottom" popover="Share my drawing" popover-trigger="mouseenter"
+          ng-disabled="false"><i class="fa fa-envelope"></i> Share</a>
+
+      <button
+          class="btn btn-link btn-sm"
+          popover-placement="bottom" popover="Load drawing in address bar" popover-trigger="mouseenter"
+          ng-click="showLink()"><i class="fa fa-link"></i> Reload</button>
+      </button>
+    </span>
+
+    <button
+        class="btn btn-link btn-sm"
+        popover-placement="bottom" popover="Clear drawing" popover-trigger="mouseenter"
+        ng-click="reset()"><i class="fa fa-bolt"></i> Clear</button>
+    </button>
+    
+    <a ng-href="{{getUrl()}}" target="_parent" class="btn btn-sm btn-info pull-right" ng-hide="fullScreen"><i class="fa fa-expand"></i> Full Screen</a>
+
+    <a href="{{backLink}}" ng-show="fullScreen"
+        popover-placement="bottom" popover="Exit drawing and full screen" popover-trigger="mouseenter"
+        class="btn btn- btn-sm btn-info pull-right"
+        ng-disabled="false"><i class="fa fa-compress"></i> Exit</a>
 </div>
 
 <svg d3
@@ -28,6 +59,7 @@
   ng-attr-height="{{svgHeight()}}"
   ng-attr-width="{{svgWidth()}}"
 >
+
   <g ng-attr-transform="{{transform()}}">
     <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}" ng-click="toggle(p)"
       ng-attr-points="{{p.points}}">
@@ -39,28 +71,13 @@
       ng-attr-y1="{{line.y1}}"
       ng-attr-y2="{{line.y2}}"></line>
 
-    <g ng-repeat="row in grid.rows" >
+    <g ng-repeat="row in grid.rows" ng-attr-transform="translate(0 {{row.y}})">
       <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
       <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
-      <line ng-repeat="dot in row"
-        ng-attr-x1="{{dot.x}}"
-        ng-attr-x2="{{dot.x}}"
-        ng-attr-y1="{{dot.y}}"
-        ng-attr-y2="{{dot.y}}"
-        ng-class="{smalldot:true}"
-      ></line>
-    </g>
-
-    <g ng-repeat="row in grid.rows" >
-      <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
-      <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
-      <line ng-repeat="dot in row" ng-click="dotClick(dot)"
-        ng-attr-x1="{{dot.x}}"
-        ng-attr-x2="{{dot.x}}"
-        ng-attr-y1="{{dot.y}}"
-        ng-attr-y2="{{dot.y}}"
-        ng-class="classHash(dot)"
-      ></line>
+      <g ng-repeat="dot in row" ng-attr-transform="translate({{dot.x}} 0)">
+        <line class="smalldot"></line>
+        <line ng-click="dotClick(dot)" ng-class="classHash(dot)"></line>
+      </g>
     </g>
 
   </g>

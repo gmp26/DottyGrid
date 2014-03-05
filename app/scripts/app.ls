@@ -6,7 +6,7 @@ angular.module 'DottyApp' <[ ngRoute ngTouch dottyGrid ui.bootstrap ]>
       templateUrl: 'views/main.html'
       controller: 'dottyGridController'
     }
-    $routeProvider.when '/:cmds', {
+    $routeProvider.when '/:cmds/:app?/:id?', {
       templateUrl: 'views/main.html'
       controller: 'dottyGridController'
     }
