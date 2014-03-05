@@ -383,6 +383,19 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         commandStore.pointer = 0
         commandStore.play!), 2000
 
+  #
+  # Messed up playback - but could be nice
+  #
+  # .directive 'ngOnce', <[$timeout]> ++ ($timeout) -> {
+  #   restrict: 'EA'
+  #   priority: 500
+  #   transclude: true
+  #   template: '<g ng-transclude></g>'
+  #   compile: (tElement, tAttrs, transclude) ->
+  #     function postLink(scope, iElement, iAttrs, controller)
+  #       $timeout scope.$destroy.bind(scope), 0
+  # }
+
   .directive 'd3', <[]> ++ ->
     restrict: 'A'
     link: (scope, element, attrs) !->
