@@ -86,19 +86,13 @@ angular.module 'polygons', []
         poly
 
       closeAllDots: (poly) ->
-        for colRow in poly.data
-          dot = @scope.getDot colRow
-          dot.active = false
-          dot.polyFirst = false
-          dot.polyLast = false
-        poly
+        @scope.polyFirst = false
+        @scope.polyLast = false
 
       draw: (dot) ->
         polygon = @polygons[*-1]
 
-        if dot.active
-          if !dot.polyFirst
-            return
+        if @scope.polyFirst and dot.x == @scope.greenDot.x and dot.y == @scope.greenDot.y
 
           # close polygon and save in polygons array
           if polygon.data.length > 2
@@ -110,16 +104,20 @@ angular.module 'polygons', []
 
         else
           # append dot to current polygon
-          if dot.active
-            return
           polygon.data[*] = dot.p
           @setPoints polygon
-          dot.active = @polygons.length
+
           if polygon.data.length > 1
-            lastDot = @scope.getDot polygon.data[*-2]
-            lastDot.polyLast = false
-          dot.polyLast = true
-          dot.polyFirst = polygon.data.length == 1
+            @scope.orangeDot = 
+              x: @scope.c2x dot.p.0
+              y: @scope.r2y dot.p.1
+            @scope.polyLast = true
+
+          if polygon.data.length == 1
+            @scope.polyFirst = true
+            @scope.greenDot = 
+              x: @scope.c2x dot.p.0
+              y: @scope.r2y dot.p.1
 
       undraw: ->
         # undraw the last dot
@@ -133,22 +131,31 @@ angular.module 'polygons', []
             polygon = @polygons[*-1]
             points = polygon.data
             if points.length > 0
-              (@scope.getDot points.0).polyFirst = true
-              for p, n in points
-                (@scope.getDot p).active = true #if n > 0
-              (@scope.getDot points[*-1]).polyLast = true
+              @scope.polyFirst = true
+              @scope.greenDot = 
+                x: @scope.c2x points.0.0
+                y: @scope.r2y points.0.1
+              @scope.polyLast = true
+              @scope.orangeDot = 
+                x: @scope.c2x points[*-1].0
+                y: @scope.r2y points[*-1].1
           else
             @polygons[*] = polygon
         else
           # remove the last point in the current polygon
-          @scope.getDot points.pop!
-            ..active = false
-            ..polyFirst = false
-            ..polyLast = false
+          points.pop!
+          @scope.polyFirst = false
+          @scope.polyLast = false
           if points.length > 0
-            (@scope.getDot points[*-1])
-              ..active = true
-              ..polyLast = true
+            @scope.polyFirst = true
+            @scope.greenDot = 
+              x: @scope.c2x points.0.0
+              y: @scope.r2y points.0.1
+          if points.length > 1
+            @scope.polyLast = true
+            @scope.orangeDot = 
+              x: @scope.c2x points[*-1].0
+              y: @scope.r2y points[*-1].1
           @polygons[*] = polygon
         @setPoints polygon
 

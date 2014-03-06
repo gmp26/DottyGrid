@@ -35,7 +35,7 @@ angular.module 'lines', <[trash commandStore]>
       # Bit of a code smell -- injecting scope in an initialiser
       #
       init: (scope) ->
-        @dotA = null
+        scope.blueDot = null
         @tool.enabled = -> true
         @scope = scope
         @lines = []
@@ -82,8 +82,6 @@ angular.module 'lines', <[trash commandStore]>
         enabled: true
         weight: 1
 
-      dotA: null
-
       draw: (dot) ->
         if @lines.length > 0 && !@lines[*-1].data.p2?
           line = @lines[*-1]
@@ -91,36 +89,37 @@ angular.module 'lines', <[trash commandStore]>
           line = new Line!
           @lines[*] = line
 
-        if !@dotA
+        if !@scope.lineFirst
           line.data.p1 = dot.p
           line.x1 = @scope.c2x dot.p.0
           line.y1 = @scope.r2y dot.p.1
           line.x2 = @scope.c2x dot.p.0
           line.y2 = @scope.r2y dot.p.1
+          @scope.blueDot = {} 
+          @scope.blueDot.x = @scope.c2x dot.p.0
+          @scope.blueDot.y = @scope.r2y dot.p.1
 
-          dot.lineFirst = true
-          @dotA = dot 
+          @scope.lineFirst = true
         else
           line.data.p2 = dot.p
           line.x2 = @scope.c2x dot.p.0
           line.y2 = @scope.r2y dot.p.1
-          @dotA.lineFirst = false
-          @dotA = null
+          @scope.lineFirst = false
         @lines[*-1] = line
 
       undraw: ->
         # undraw the last dot drawn
         console.log "undraw line"
-        if @dotA
-          @dotA.lineFirst = false
-          @dotA = null
+        if @scope.lineFirst
+          @scope.lineFirst = false
+          @scope.blueDot = null
           @lines.pop! unless @lines.length == 0
         else
           line = @lines[*-1]
           line.x2 = line.x1
           line.y2 = line.y1
-          @dotA = @scope.getDot line.data.p1
-          @dotA.lineFirst = true
+          @scope.blueDot = @scope.getDot line.data.p1
+          @scope.lineFirst = true
           delete line.data.p2
 
             

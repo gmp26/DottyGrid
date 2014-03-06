@@ -307,18 +307,23 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
     $scope.makeGrid!
 
-    var ch = 0
+    # var ch
+    # ch = 0
     $scope.classHash = (dot) ->
-      if (++ch % 10) == 0
-        console.log ch
+      # if (++ch % 10) == 0
+      #   console.log "ch=#{ch}"
       return
         circle: true
-        lit: dot.first
-        "line-lit": dot.lineFirst
+        # lit: dot.first
+        # "line-lit": dot.lineFirst
         "poly-lit": dot.polyFirst
         "poly-open": dot.polyLast && !dot.polyFirst
 
+    # var dc
+    # dc = 0
     $scope.dotClick = (dot) !->
+      # if (++dc % 10) == 0
+      #   console.log "dc=#{dc}"
       for plugin in $scope.plugins
         if $scope.currentTool == plugin.tool.id && plugin.draw
           #plugin.draw dot
@@ -388,15 +393,15 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         commandStore.play!), 2000
 
   
-  .directive 'ngOnce', <[$timeout]> ++ ($timeout) -> {
-    restrict: 'EA'
-    priority: 500
-    transclude: true
-    template: '<g ng-transclude></g>'
-    compile: (tElement, tAttrs, transclude) ->
-      function postLink(scope, iElement, iAttrs, controller)
-        $timeout scope.$destroy.bind(scope), 0
-  }
+  # .directive 'ngOnce', <[$timeout]> ++ ($timeout) -> {
+  #   restrict: 'EA'
+  #   priority: 500
+  #   transclude: true
+  #   template: '<g ng-transclude></g>'
+  #   compile: (tElement, tAttrs, transclude) ->
+  #     function postLink(scope, iElement, iAttrs, controller)
+  #       $timeout scope.$destroy.bind(scope), 0
+  # }
 
   .directive 'd3', <[]> ++ ->
     restrict: 'A'

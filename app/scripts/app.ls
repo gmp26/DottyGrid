@@ -3,11 +3,11 @@
 angular.module 'DottyApp' <[ ngRoute ngTouch dottyGrid ui.bootstrap ]>
   .config <[$routeProvider]> ++ ($routeProvider) ->
     $routeProvider.when '/', {
-      templateUrl: 'views/main.html'
+      templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
     }
     $routeProvider.when '/:cmds/:app?/:id?', {
-      templateUrl: 'views/main.html'
+      templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
     }
     .otherwise {
