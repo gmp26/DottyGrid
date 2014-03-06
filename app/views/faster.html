@@ -71,15 +71,15 @@
       ng-attr-y1="{{line.y1}}"
       ng-attr-y2="{{line.y2}}"></line>
 
-    <g ng-repeat="row in grid.rows" ng-attr-transform="translate(0 {{row.y}})" >
+    <g ng-repeat="row in grid.rows" ng-attr-transform="translate(0 {{row.y}})" ng-once>
       <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->
       <!-- the svg circle directive needs an `r` attribute which can't be set in CSS -->
       <g ng-repeat="dot in row" ng-attr-transform="translate({{dot.x}} 0)" >
         <line class="smalldot"></line>
-        <line ng-click="dotClick(dot)" class="circle"></line>
+        <line  class="circle"></line>
       </g>
     </g>
-
+<!-- ng-click="dotClick(dot)" -->
     <line class="circle poly-lit" ng-show="polyFirst"
       ng-attr-x1="{{greenDot.x}}"
       ng-attr-x2="{{greenDot.x}}"

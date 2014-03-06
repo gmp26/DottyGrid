@@ -400,23 +400,23 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         commandStore.pointer = 0
         commandStore.play!), 2000
 
-  
-  # .directive 'ngOnce', <[$timeout]> ++ ($timeout) -> {
-  #   restrict: 'EA'
-  #   priority: 500
-  #   transclude: true
-  #   template: '<g ng-transclude></g>'
-  #   compile: (tElement, tAttrs, transclude) ->
-  #     function postLink(scope, iElement, iAttrs, controller)
-  #       $timeout scope.$destroy.bind(scope), 0
-  # }
-
   .directive 'd3', <[]> ++ ->
     restrict: 'A'
     link: (scope, element, attrs) !->
       # console.log "d3 directive"
 
       svg = d3.select element.0
+      xy2dot = (p) ->
+        p.0 = p.0 * 4/3
+        p.1 = p.1 * 4/3
+        [c,r] = scope.xy2cr p
+        cC = c - Math.round(c)
+        rR = r - Math.round(r)
+        console.log "[c,r] = #{c}, #{r}"
+        if (Math.sqrt (cC*cC + rR*rR)) < 15
+          dot = scope.xy2dot p
+        else
+          null
 
       trace = ->
         p = [x,y] = d3.mouse element.0
@@ -425,18 +425,25 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         # console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 
       d3Click = (event) ->
-        trace!
-        if scope.currentTool == 'camera'
-          p = [x,y] = d3.mouse element.0
-          [c,r] = scope.xy2cr p
-          scope.cameras[*] =
-            data: [c,r]
-          scope.cameraDraw
-          scope.makeVisibles!
+        p = [x,y] = d3.mouse element.0
+        dot = xy2dot p
 
-          # switch back to previous tool immediately
-          scope.toolClick scope.lastTool
+        # switch back to previous tool immediately
+        if dot
+          scope.dotClick dot
 
         scope.$apply!
 
       svg.on "click", d3Click
+
+
+  .directive 'ngOnce', <[$timeout]> ++ ($timeout) -> {
+    restrict: 'EA'
+    priority: 500
+    transclude: true
+    template: '<g ng-transclude></g>'
+    compile: (tElement, tAttrs, transclude) ->
+      function postLink(scope, iElement, iAttrs, controller)
+        $timeout scope.$destroy.bind(scope), 0
+  }
+
