@@ -27,12 +27,12 @@
         ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
     </div>
     
-    <span ng-show="fullScreen">
-      <a href="mailto:{{mailTo}}?subject={{mailSubject}}&amp;body={{mailBody()}}"
-          class="btn btn-link btn-sm"
-          popover-placement="bottom" popover="Share my drawing" popover-trigger="mouseenter"
-          ng-disabled="false"><i class="fa fa-envelope"></i> Share</a>
+    <a href="mailto:{{mailTo}}?subject={{mailSubject}}&amp;body={{mailBody()}}"
+        class="btn btn-link btn-sm"
+        popover-placement="bottom" popover="Share my drawing" popover-trigger="mouseenter"
+        ng-disabled="false"><i class="fa fa-envelope"></i> Share</a>
 
+    <span ng-show="fullScreen">
       <button
           class="btn btn-link btn-sm"
           popover-placement="bottom" popover="Load drawing in address bar" popover-trigger="mouseenter"
