@@ -139,43 +139,46 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
           p.tool.active = "btn-sm"
         tool.active = "btn"
 
-    installPlugin polygonsFactory, 'polygons', true
-    installPlugin linesFactory, 'lines'
+    installTools = !->
+      installPlugin polygonsFactory, 'polygons', true
+      installPlugin linesFactory, 'lines'
 
-    $scope.toolset = sort-by (.weight), ($scope.toolset ++ toolset)
+      $scope.toolset = sort-by (.weight), ($scope.toolset ++ toolset)
 
-    [$scope.playerTools, $scope.drawTools] = partition ((tool) -> tool.icon in <[
-      fast-backward
-      step-backward
-      pause
-      step-forward
-      fast-forward
-    ]>), $scope.toolset
+      [$scope.playerTools, $scope.drawTools] = partition ((tool) -> tool.icon in <[
+        fast-backward
+        step-backward
+        pause
+        step-forward
+        fast-forward
+      ]>), $scope.toolset
 
-    [$scope.undoTools, $scope.playerTools] = partition ((tool) -> tool.icon in <[
-      step-backward
-      step-forward ]>), $scope.playerTools
+      [$scope.undoTools, $scope.playerTools] = partition ((tool) -> tool.icon in <[
+        step-backward
+        step-forward ]>), $scope.playerTools
 
-    for tool in $scope.drawTools
-      if tool.id == 'trash'
-        break
+      for tool in $scope.drawTools
+        if tool.id == 'trash'
+          break
 
-    cmds = $scope.commands
-    for tool in $scope.toolset
-      tool.enabled =
-        switch tool.icon
-        | 'pause' => -> !cmds.stopped
-        | 'step-backward', 'fast-backward' => -> cmds.stopped && cmds.pointer > 0
-        | 'step-forward', 'fast-forward'  => -> cmds.stopped && cmds.pointer < cmds.stack.length
-        | 'trash-o' => ->
-          for polygon in $scope.polygons!
-            if polygon.selected
-              return true
-          for line in $scope.lines!
-            if line.selected
-              return true
-          return false
-        | otherwise  => -> cmds.stopped
+      cmds = $scope.commands
+      for tool in $scope.toolset
+        tool.enabled =
+          switch tool.icon
+          | 'pause' => -> !cmds.stopped
+          | 'step-backward', 'fast-backward' => -> cmds.stopped && cmds.pointer > 0
+          | 'step-forward', 'fast-forward'  => -> cmds.stopped && cmds.pointer < cmds.stack.length
+          | 'trash-o' => ->
+            for polygon in $scope.polygons!
+              if polygon.selected
+                return true
+            for line in $scope.lines!
+              if line.selected
+                return true
+            return false
+          | otherwise  => -> cmds.stopped
+
+    installTools!
 
     $scope.deleteSelection = ->
       # delegate to deletion hooks
@@ -194,10 +197,14 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       #$scope.commandStack = []
       $scope.makeGrid!
       $scope.commands.clear!
+      $scope.toolset = []
+      installTools!
       $scope.currentTool = 'poly'
-      $scope.toolset = toolset.concat!
-      for plugin in $scope.plugins
-        plugin.init $scope
+      $scope.polyFirst = $scope.polyLast = $scope.lineFirst = false
+      # $scope.currentTool = 'poly'
+      # $scope.toolset = toolset.concat!
+      # for plugin in $scope.plugins
+      #   plugin.init $scope
 
 
     $scope.toolClick = (tool) ->
