@@ -140,6 +140,8 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         tool.active = "btn"
 
     installTools = !->
+      $scope.plugins = []
+      $scope.toolset = []
       installPlugin polygonsFactory, 'polygons', true
       installPlugin linesFactory, 'lines'
 
@@ -195,10 +197,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $scope.reset = ->
       console.log "clear all"
       #$scope.commandStack = []
+      installTools!
       $scope.makeGrid!
       $scope.commands.clear!
-      $scope.toolset = []
-      installTools!
       $scope.currentTool = 'poly'
       $scope.polyFirst = $scope.polyLast = $scope.lineFirst = false
       # $scope.currentTool = 'poly'
