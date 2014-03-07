@@ -264,6 +264,15 @@ module.exports = (grunt) ->
         dirs: ['<%= yeoman.dist %>']
 
     imagemin:
+
+      icons:
+        files: [
+          expand: true
+          cwd: '<%= yeoman.app %>/img'
+          src: 'touch-icon-*.png'
+          dest: '<%= yeoman.dist %>'
+        ]
+        
       dist:
         files: [
           expand: true
