@@ -100,7 +100,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     app = $routeParams.app?.toString!toLowerCase!
     $scope.id = ~~$routeParams.id || 10791
     $scope.backLink = "http://nrich.maths.org/#{$scope.id}"
-    $scope.fullScreen = (app and app != "0" and app != "false")
+    $scope.fullScreen = (app and app != "0" and app != "false") || !$routeParams.id?
 
     $scope.fills = [
       'red'

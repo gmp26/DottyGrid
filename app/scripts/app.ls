@@ -2,14 +2,19 @@
 
 angular.module 'DottyApp' <[ ngRoute ngTouch dottyGrid ui.bootstrap ]>
   .config <[$routeProvider]> ++ ($routeProvider) ->
-    $routeProvider.when '/', {
+
+    $routeProvider
+    .when '/', do
       templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
-    }
-    $routeProvider.when '/:cmds/:app?/:id?', {
+    .when '/:cmds?/:app?', do
       templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
-    }
-    .otherwise {
+    .when '/:cmds?/:id?', do
+      templateUrl: 'views/faster.html'
+      controller: 'dottyGridController'
+    .when '/:cmds?/:app?&:id?', do
+      templateUrl: 'views/faster.html'
+      controller: 'dottyGridController'
+    .otherwise do
       redirectTo: '/'
-    }
