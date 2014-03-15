@@ -17,9 +17,12 @@ angular.module 'lines', <[trash commandStore]>
         @klassmid = "mid-line"    
         @klassthin = "thin-line"    
         @data = {}
-        @toggle = -> 
-          @selected = !@selected
-          @klassthin  = "thin-line " + if @selected then " opaque" else ""
+        @toggle = ->
+          
+        # @toggle = -> 
+        #   @selected = !@selected
+        #   @klassthin  = "thin-line " + if @selected then " opaque" else ""
+
         # @toggle = ->
         #   commandStore.newdo @, @doToggle, null, @doToggle
         @x1 = 0

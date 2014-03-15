@@ -19,8 +19,11 @@ angular.module 'polygons', []
         @data = []
         @ppoints = ""
         @toggle = ->
-          @selected = !@selected
-          @klass = @polyfill + if @selected then " opaque" else ""
+
+        # @toggle = ->
+        #   @selected = !@selected
+        #   @klass = @polyfill + if @selected then " opaque" else ""
+          
         @@n := (@@n+1) % 8
 
     do

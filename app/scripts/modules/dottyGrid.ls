@@ -85,15 +85,26 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     polygonsFactory
   ) ->
 
-    colCount = 30
-    rowCount = 30
+    # colCount = 30
+    # rowCount = 30
+
+    # # Pixels from centre of an edge dot to the svg container boundary
+    # inset = 20
+
+    # # Dot separation in pixels
+    # sep = 30
+    # $scope.scale = 0.75
+
+
+    colCount = 17
+    rowCount = 20
 
     # Pixels from centre of an edge dot to the svg container boundary
     inset = 20
 
     # Dot separation in pixels
-    sep = 30
-    scale = 0.75
+    sep = 40
+    $scope.scale = 1
 
     # console.log "dottyGridController"
 
@@ -249,7 +260,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       console.log "(#{col}, #{row})"
 
     $scope.transform = ->
-      return "scale(#{scale})"
+      return "scale(#{$scope.scale})"
 
     #
     # The scope model uses column, row coordinates, but the svg element
@@ -294,8 +305,8 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       row = $scope.y2R p.1
       $scope.grid.rows[row][col]
 
-    $scope.svgWidth = -> scale * (inset + $scope.c2x colCount-1)
-    $scope.svgHeight = -> scale * (inset + $scope.r2y 0)
+    $scope.svgWidth = -> $scope.scale * (inset + $scope.c2x colCount-1)
+    $scope.svgHeight = -> $scope.scale * (inset + $scope.r2y 0)
 
     #
     # dots in the dotty grid
@@ -365,7 +376,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
           ''
       ) * '!'
 
-    $scope.getUrl = -> "http://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app&id=#{$scope.id}"
+    $scope.getUrl = -> "http://nrich.maths.org/miniGrid/\#/#{$scope.toString!}?app&id=#{$scope.id}"
 
     $scope.showLink = ->
       url = $scope.toString!
@@ -376,7 +387,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
     console.log "scope.toString! = " + $scope.toString!
 
-    $scope.mailBody = -> "Here's%20my%20drawing.%0A%0Ahttp://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app=1%0A%0A
+    $scope.mailBody = -> "Here's%20my%20drawing.%0A%0Ahttp://nrich.maths.org/miniGrid/\#/#{$scope.toString!}?app=1%0A%0A
     I%20think%20it's%20interesting%20because..."
 
     $scope.polyPoints = (p) ->
@@ -407,13 +418,13 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
       svg = d3.select element.0
       xy2dot = (p) ->
-        p.0 = p.0 * 4/3
-        p.1 = p.1 * 4/3
+        p.0 = p.0 / scope.scale
+        p.1 = p.1 / scope.scale
         [c,r] = scope.xy2cr p
         cC = c - Math.round(c)
         rR = r - Math.round(r)
         console.log "[c,r] = #{c}, #{r}"
-        if (Math.sqrt (cC*cC + rR*rR)) < 15
+        if (Math.sqrt (cC*cC + rR*rR)) < 20
           dot = scope.xy2dot p
         else
           null
