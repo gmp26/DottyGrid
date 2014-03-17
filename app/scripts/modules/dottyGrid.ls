@@ -404,7 +404,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     if $routeParams.cmds
       $scope.reset!
       for cmd in ($routeParams.cmds.split '!')
+        continue if cmd == ""
         [index, c, r] = cmd.split '-'
+        continue unless 0 <= index <= 1 and 0 <= r <= rowCount and 0 <= c <= colCount
         plugin = $scope.plugins[index]
         commandStore.newdo plugin, plugin.draw, ($scope.getDot [c,r]), plugin.undraw, false
       $timeout (->
