@@ -6,7 +6,7 @@
 {flatten, partition} = require 'prelude-ls'
 
 angular.module 'polygons', []
-  .factory 'polygonsFactory', <[trash commandStore]> ++ (trash, commandStore) ->
+  .factory 'polygonsFactory', <[commandStore]> ++ (commandStore) ->
 
     class Polygon
       @n = 0
@@ -18,12 +18,6 @@ angular.module 'polygons', []
         @klass = @polyfill
         @data = []
         @ppoints = ""
-        @toggle = ->
-
-        # @toggle = ->
-        #   @selected = !@selected
-        #   @klass = @polyfill + if @selected then " opaque" else ""
-          
         @@n := (@@n+1) % 8
 
     do
@@ -39,38 +33,6 @@ angular.module 'polygons', []
 
       count: -> @polygons.length
 
-      remove: !->
-        [@polygons, deletions] = partition ((polygon) -> !polygon.selected), @polygons
-        if deletions.length > 0
-          trash.binit "poly#{commandStore.pointer}", deletions
-          # console.log "binning id=poly#{commandStore.pointer}"
-          for poly in deletions
-            @closeAllDots poly
-            # console.log "removing #{poly.id}"
-          if @polygons.length == 0
-            @polygons = [new Polygon()]
-            # console.log "new empty poly #{@polygons.0.id}"
-
-
-      restore: ->
-        id = "poly#{commandStore.pointer + 1}"
-        polygons = trash.unbin id
-        if polygons?
-          for polygon in polygons
-            polygon.selected = true
-            # console.log "restoring #{polygon.id}"
-          if polygons && polygons.length > 0
-            @polygons = polygons ++ @polygons
-        else
-          # console.log "no polygons restored"
-
-      deleteSelection: -> {
-        thisObj:@
-        action: @remove
-        params: null
-        undo: @restore
-      }
-
       tool:
         id: 'poly'
         icon: 'pencil-square-o'
@@ -78,7 +40,7 @@ angular.module 'polygons', []
         type: 'success'
         tip: 'Click dots to draw a shape. Finish by clicking back on the green dot'
         enabled: true
-        weight: 2
+        weight: 3
 
       tracePolygons: ->
         console.log (@polygons.map (polygon)->polygon.data.length).join " "

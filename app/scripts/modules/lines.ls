@@ -3,8 +3,8 @@
 #
 # simple module that adds line drawing
 #
-angular.module 'lines', <[trash commandStore]>
-  .factory 'linesFactory', <[trash commandStore]> ++ (trash, commandStore) ->
+angular.module 'lines', <[commandStore]>
+  .factory 'linesFactory', <[commandStore]> ++ (commandStore) ->
 
     {partition} = require 'prelude-ls'
 
@@ -17,14 +17,6 @@ angular.module 'lines', <[trash commandStore]>
         @klassmid = "mid-line"    
         @klassthin = "thin-line"    
         @data = {}
-        @toggle = ->
-          
-        # @toggle = -> 
-        #   @selected = !@selected
-        #   @klassthin  = "thin-line " + if @selected then " opaque" else ""
-
-        # @toggle = ->
-        #   commandStore.newdo @, @doToggle, null, @doToggle
         @x1 = 0
         @y1 = 0
         @x2 = 0
@@ -48,34 +40,6 @@ angular.module 'lines', <[trash commandStore]>
 
       count: -> @lines.length
 
-      remove: ->
-        [@lines, binned] = partition ((line) -> !line.selected), @lines
-        if binned.length > 0
-          trash.binit "lines#{commandStore.pointer}", binned
-          # console.log "binning id=lines#{commandStore.pointer}"
-          # for line in binned
-          # console.log "removing #{@line.id}"
-
-      restore: ->
-        id = "lines#{commandStore.pointer + 1}"
-        lines = trash.unbin id
-        if lines?
-          for line in lines
-            line.selected = true
-            # console.log "restoring #{@line.id}"
-          if lines && lines.length > 0
-            @lines = lines ++ @lines
-        else
-          # console.log "no lines to restore"
-
-      deleteSelection: -> {
-        thisObj:@
-        action: @remove
-        params: null
-        undo: @restore
-      }
-
-
       tool:
         id: 'line'
         icon: 'pencil'
@@ -83,7 +47,7 @@ angular.module 'lines', <[trash commandStore]>
         type: 'primary'
         tip: 'Click on 2 dots to draw a line'
         enabled: true
-        weight: 1
+        weight: 2
 
       draw: (dot) ->
         if @lines.length > 0 && !@lines[*-1].data.p2?

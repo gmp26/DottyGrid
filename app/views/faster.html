@@ -61,15 +61,37 @@
 >
 
   <g ng-attr-transform="{{transform()}}">
-    <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}" ng-click="toggle(p)"
+    <polygon ng-repeat="p in polygons()" ng-attr-class="{{p.klass}}"
       ng-attr-points="{{p.points}}">
     </polygon>
 
-    <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}" ng-click="toggle(line)"
+    <line ng-repeat="line in lines()" ng-attr-class="{{line.klassthin}}"
       ng-attr-x1="{{line.x1}}"
       ng-attr-x2="{{line.x2}}"
       ng-attr-y1="{{line.y1}}"
       ng-attr-y2="{{line.y2}}"></line>
+
+    <line ng-repeat="dot in orangeDots()" class="circle drawnorange"
+      ng-attr-x1="{{dot.x}}"
+      ng-attr-x2="{{dot.x}}"
+      ng-attr-y1="{{dot.y}}"
+      ng-attr-y2="{{dot.y}}">
+    </line>
+
+    <line ng-repeat="dot in blueDots()" class="circle drawnblue"
+      ng-attr-x1="{{dot.x}}"
+      ng-attr-x2="{{dot.x}}"
+      ng-attr-y1="{{dot.y}}"
+      ng-attr-y2="{{dot.y}}">
+    </line>
+
+    <line ng-repeat="dot in redDots()" class="circle drawnred"
+      ng-attr-x1="{{dot.x}}"
+      ng-attr-x2="{{dot.x}}"
+      ng-attr-y1="{{dot.y}}"
+      ng-attr-y2="{{dot.y}}">
+    </line>
+
 
     <g ng-repeat="row in grid.rows" ng-attr-transform="translate(0 {{row.y}})" >
       <!-- lines from dot A to dot A create circles of radius determined by CSS line-stroke -->

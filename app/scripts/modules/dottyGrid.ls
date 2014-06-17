@@ -2,26 +2,11 @@
 
 {any, empty, filter, find, flatten, partition, reject, sort-by, tail} = require 'prelude-ls'
 
-angular.module 'dottyGrid' <[lines polygons commandStore]>
+angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandStore]>
 
   # define the toolset
   .factory 'toolset', -> [
 
-    # * id:'trash'
-    #   icon: 'trash-o'
-    #   label: 'Delete selected'
-    #   tip: 'Click a line or shape to select it, avoiding the dots. Selections show in red'
-    #   type: 'danger'
-    #   enabled: -> true
-    #   active: ""
-    #   weight: 5
-    # * id:'reset'
-    #   icon: 'bolt'
-    #   label: 'Clear'
-    #   type: 'default'
-    #   enabled: true
-    #   active: ""
-    #   weight: 6
     * id:'rewind'
       icon: 'fast-backward'
       label: ''
@@ -72,6 +57,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $timeout
     commandStore
     toolset
+    orangeDotsFactory
+    blueDotsFactory
+    redDotsFactory
     linesFactory
     polygonsFactory
   ]> ++ (
@@ -81,6 +69,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
     $timeout,
     commandStore,
     toolset,
+    orangeDotsFactory,
+    blueDotsFactory,
+    redDotsFactory,
     linesFactory,
     polygonsFactory
   ) ->
@@ -155,6 +146,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       $scope.toolset = []
       installPlugin polygonsFactory, 'polygons', true
       installPlugin linesFactory, 'lines'
+      installPlugin orangeDotsFactory, 'orangeDots'
+      installPlugin blueDotsFactory, 'blueDots'
+      installPlugin redDotsFactory, 'redDots'
 
       $scope.toolset = sort-by (.weight), ($scope.toolset ++ toolset)
 
@@ -170,10 +164,6 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         step-backward
         step-forward ]>), $scope.playerTools
 
-      for tool in $scope.drawTools
-        if tool.id == 'trash'
-          break
-
       cmds = $scope.commands
       for tool in $scope.toolset
         tool.enabled =
@@ -181,29 +171,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
           | 'pause' => -> !cmds.stopped
           | 'step-backward', 'fast-backward' => -> cmds.stopped && cmds.pointer > 0
           | 'step-forward', 'fast-forward'  => -> cmds.stopped && cmds.pointer < cmds.stack.length
-          | 'trash-o' => ->
-            for polygon in $scope.polygons!
-              if polygon.selected
-                return true
-            for line in $scope.lines!
-              if line.selected
-                return true
-            return false
           | otherwise  => -> cmds.stopped
 
     installTools!
-
-    $scope.deleteSelection = ->
-      # delegate to deletion hooks
-      newdos = $scope.plugins.map (.deleteSelection!)
-      thisObj =
-        action: -> for newdo in newdos
-          newdo.action.call newdo.thisObj
-        undo: -> for newdo in newdos
-          newdo.undo.call newdo.thisObj
-
-      commandStore.newdo thisObj, thisObj.action, 'delete', thisObj.undo
-      $scope.selectionIsEmpty = true
 
     $scope.reset = ->
       console.log "clear all"
@@ -228,9 +198,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         if tool.id == plugin.tool.id
           return plugin.toolAction tool
 
-      if tool.id == 'trash'
-        $scope.deleteSelection!
-      else if tool.id == 'reset'
+      if tool.id == 'reset'
         $scope.reset!
       else if tool.id == 'rewind'
         # console.log "rewind"
@@ -350,25 +318,9 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
           # console.log $scope.toString!
           return
 
-    # delegate click on object to the object, but stack the command on the way
-    #
-    # TODO: Toggle does not play well with undo/redo yet. The problem is that
-    # if an undo deletes a selected object, that object will be recreated on
-    # a future redo. The `thisObject` for the toggle redo will point to the
-    # deleted object rather than the new one.
-    #
-    # Instead of deleting objects, undo/redo should trash them so redo/undo can
-    # restore them from trash rather than recreated.
-    #
-    $scope.toggle = (object) ->
-      # console.log "toggle #{object.id}"
-      commandStore.newdo object, object.toggle, null, object.toggle
-
     $scope.toString = -> 
       (for command in $scope.commands.stack
-        if command.params == 'delete'
-          ''
-        else if command.params
+        if command.params
           plugin = command.thisObj
           dot = command.params
           "#{plugin.index}-#{dot.p.0}-#{dot.p.1}"
@@ -376,7 +328,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
           ''
       ) * '!'
 
-    $scope.getUrl = -> "http://nrich.maths.org/miniGrid/\#/#{$scope.toString!}?app&id=#{$scope.id}"
+    $scope.getUrl = -> "http://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app&id=#{$scope.id}"
 
     $scope.showLink = ->
       url = $scope.toString!
@@ -387,7 +339,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
 
     console.log "scope.toString! = " + $scope.toString!
 
-    $scope.mailBody = -> "Here's%20my%20drawing.%0A%0Ahttp://nrich.maths.org/miniGrid/\#/#{$scope.toString!}?app=1%0A%0A
+    $scope.mailBody = -> "Here's%20my%20drawing.%0A%0Ahttp://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app=1%0A%0A
     I%20think%20it's%20interesting%20because..."
 
     $scope.polyPoints = (p) ->
@@ -406,7 +358,7 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
       for cmd in ($routeParams.cmds.split '!')
         continue if cmd == ""
         [index, c, r] = cmd.split '-'
-        continue unless 0 <= index <= 1 and 0 <= r <= rowCount and 0 <= c <= colCount
+        continue unless 0 <= index <= 4 and 0 <= r <= rowCount and 0 <= c <= colCount
         plugin = $scope.plugins[index]
         commandStore.newdo plugin, plugin.draw, ($scope.getDot [c,r]), plugin.undraw, false
       $timeout (->
@@ -441,7 +393,6 @@ angular.module 'dottyGrid' <[lines polygons commandStore]>
         p = [x,y] = d3.mouse element.0
         dot = xy2dot p
 
-        # switch back to previous tool immediately
         if dot
           scope.dotClick dot
 
