@@ -14,8 +14,8 @@ angular.module 'lines', <[commandStore]>
         @id = "line#{++@@id}"
         @selected = false
         @klass = "line"
-        @klassmid = "mid-line"    
-        @klassthin = "thin-line"    
+        @klassmid = "mid-line"
+        @klassthin = "thin-line"
         @data = {}
         @x1 = 0
         @y1 = 0
@@ -58,18 +58,18 @@ angular.module 'lines', <[commandStore]>
 
         if !@scope.lineFirst
           line.data.p1 = dot.p
-          line.x1 = @scope.c2x dot.p.0
+          line.x1 = (@scope.c2xIso dot.p.1) dot.p.0
           line.y1 = @scope.r2y dot.p.1
-          line.x2 = @scope.c2x dot.p.0
+          line.x2 = (@scope.c2xIso dot.p.1) dot.p.0
           line.y2 = @scope.r2y dot.p.1
-          @scope.blueDot = {} 
-          @scope.blueDot.x = @scope.c2x dot.p.0
+          @scope.blueDot = {}
+          @scope.blueDot.x = (@scope.c2xIso dot.p.1) dot.p.0
           @scope.blueDot.y = @scope.r2y dot.p.1
 
           @scope.lineFirst = true
         else
           line.data.p2 = dot.p
-          line.x2 = @scope.c2x dot.p.0
+          line.x2 = (@scope.c2xIso dot.p.1) dot.p.0
           line.y2 = @scope.r2y dot.p.1
           @scope.lineFirst = false
         @lines[*-1] = line
@@ -89,6 +89,6 @@ angular.module 'lines', <[commandStore]>
           @scope.lineFirst = true
           delete line.data.p2
 
-            
+
 
 

@@ -11,7 +11,7 @@ angular.module 'orangeDots', <[commandStore]>
     class Dot
       @id = 0
       ->
-        @id = "dot#{++@@id}" 
+        @id = "dot#{++@@id}"
         @data = {}
         @x = 0
         @y = 0
@@ -46,7 +46,7 @@ angular.module 'orangeDots', <[commandStore]>
       draw: (dot) ->
         console.log "draw dot"
         @dots[*] = do
-          x: @scope.c2x dot.p.0
+          x: (@scope.c2xIso dot.p.1) dot.p.0
           y: @scope.r2y dot.p.1
 
       undraw: ->
@@ -54,6 +54,6 @@ angular.module 'orangeDots', <[commandStore]>
         console.log "undraw dot"
         @dots.pop!
 
-            
+
 
 

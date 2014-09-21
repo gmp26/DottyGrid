@@ -24,7 +24,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
       active: ""
       weight: 8
     * id:'stop'
-      icon: 'pause' 
+      icon: 'pause'
       label: ''
       tip: 'pause'
       type: 'link'
@@ -50,19 +50,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
   ]
 
   .controller 'dottyGridController',
-  <[
-    $scope
-    $location
-    $routeParams
-    $timeout
-    commandStore
-    toolset
-    orangeDotsFactory
-    blueDotsFactory
-    redDotsFactory
-    linesFactory
-    polygonsFactory
-  ]> ++ (
+  <[$scope $location $routeParams $timeout commandStore toolset orangeDotsFactory blueDotsFactory redDotsFactory linesFactory polygonsFactory ]> ++ (
     $scope,
     $location,
     $routeParams,
@@ -177,6 +165,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
 
     $scope.reset = ->
       console.log "clear all"
+      $scope.coordTransforms!
       #$scope.commandStack = []
       installTools!
       $scope.makeGrid!
@@ -246,44 +235,77 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
     #
     # Note that columns and rows are numbered from bottom left!
     #
-    $scope.c2x = d3.scale.linear!
-    .domain [0,colCount-1]
-    .range [inset, colCount*sep]
 
-    $scope.x2c = $scope.c2x.invert
-    $scope.x2C = (x) -> Math.round $scope.x2c x
+    # $scope.c2x = d3.scale.linear!
+    # .domain [0,colCount-1]
+    # .range [inset, colCount*sep]
 
-    $scope.r2y = d3.scale.linear!
-    .domain [0,rowCount-1]
-    .range [rowCount*sep, inset]
+    $scope.iso = false
 
-    $scope.y2r = $scope.r2y.invert
-    $scope.y2R = (y) -> Math.round $scope.y2r y
+    oddy = d3.scale.linear!
+             .domain [0,colCount-1]
+             .range [inset + sep/2, colCount*sep + sep/2]
 
-    $scope.cr2xy = (p) ->
-      * $scope.c2x p.0
-        $scope.r2y p.1
+    ioddy = oddy.invert
 
-    $scope.xy2cr = (p) ->
-      * $scope.x2c p.0
-        $scope.y2r p.1
+    eveny = d3.scale.linear!
+             .domain [0,colCount-1]
+             .range [inset, colCount*sep]
 
-    $scope.xy2dot = (p) ->
-      col = $scope.x2C p.0
-      row = $scope.y2R p.1
-      $scope.grid.rows[row][col]
+    ieveny = eveny.invert
 
-    $scope.svgWidth = -> $scope.scale * (inset + $scope.c2x colCount-1)
-    $scope.svgHeight = -> $scope.scale * (inset + $scope.r2y 0)
+    $scope.coordTransforms = ->
+      $scope.c2xIso = (y) ->
+        if $scope.iso && y && (y % 2 == 1) then oddy else eveny
+        # sep / 2 else 0
+        # d3.scale.linear!
+        #   .domain [0,colCount-1]
+        #   .range [inset + hsep, colCount*sep + hsep]
+
+      # $scope.x2c = $scope.c2x.invert
+      # $scope.x2C = (x) -> Math.round $scope.x2c x
+
+      $scope.x2cIso = (y) ->
+        r = Math.round($scope.y2r y)
+        if ($scope.iso && r % 2 == 1) then ioddy else ieveny
+
+      # $scope.x2cIso = (y) -> ($scope.c2xIso y).invert
+      $scope.x2CIso = (y) -> ((x) -> Math.round (($scope.x2cIso y) x))
+
+      $scope.r2y = d3.scale.linear!
+        .domain [0,rowCount-1]
+        .range [rowCount*sep*(if $scope.iso then Math.sqrt(3)/2 else 1), inset]
+
+      $scope.y2r = $scope.r2y.invert
+      $scope.y2R = (y) -> Math.round $scope.y2r y
+
+      $scope.cr2xyIso = (p) ->
+        * ($scope.c2xIso p.1) p.0
+          $scope.r2y p.1
+
+      $scope.xy2crIso = (p) ->
+        * ($scope.x2cIso p.1) p.0
+          $scope.y2r p.1
+
+      $scope.xy2dot = (p) ->
+        col = ($scope.x2CIso p.1) p.0
+        row = $scope.y2R p.1
+        $scope.grid.rows[row][col]
+
+      $scope.svgWidth = ->
+        $scope.scale * (inset + ($scope.c2xIso 2) colCount-(if $scope.iso then 0.5 else 1))
+      $scope.svgHeight = -> $scope.scale * (inset + $scope.r2y 0)
+
+    $scope.coordTransforms!
 
     #
     # dots in the dotty grid
     #
-    $scope.makeGrid = -> 
+    $scope.makeGrid = ->
       rows = for rowIndex from 0 til rowCount
         row = for colIndex from 0 til colCount
           p: [colIndex, rowIndex]
-          x: $scope.c2x colIndex
+          x: ($scope.c2xIso rowIndex) colIndex
           y: $scope.r2y rowIndex
           first: false
           active: false
@@ -318,7 +340,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
           # console.log $scope.toString!
           return
 
-    $scope.toString = -> 
+    $scope.toString = ->
       (for command in $scope.commands.stack
         if command.params
           plugin = command.thisObj
@@ -343,7 +365,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
     I%20think%20it's%20interesting%20because..."
 
     $scope.polyPoints = (p) ->
-      screenPoints = p.data.map $scope.cr2xy
+      screenPoints = p.data.map $scope.cr2xyIso
       (flatten screenPoints).join " "
 
     $scope.polyClass = (p) ->
@@ -374,7 +396,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
       xy2dot = (p) ->
         p.0 = p.0 / scope.scale
         p.1 = p.1 / scope.scale
-        [c,r] = scope.xy2cr p
+        [c,r] = scope.xy2crIso p
         cC = c - Math.round(c)
         rR = r - Math.round(r)
         console.log "[c,r] = #{c}, #{r}"
@@ -385,7 +407,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
 
       trace = ->
         p = [x,y] = d3.mouse element.0
-        [c,r] = scope.xy2cr p
+        [c,r] = scope.xy2crIso p
         dot = scope.xy2dot p
         # console.log "#{d3.event.type} xy=(#{x},#{y}), cr=(#{c},#{r}), dot=(#{dot.p.0},#{dot.p.1})"
 

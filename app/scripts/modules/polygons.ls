@@ -46,7 +46,7 @@ angular.module 'polygons', []
         console.log (@polygons.map (polygon)->polygon.data.length).join " "
 
       setPoints: (poly) ->
-        screenPoints = poly.data.map @scope.cr2xy
+        screenPoints = poly.data.map @scope.cr2xyIso
         poly.points = (flatten screenPoints).join " "
         poly
 
@@ -73,15 +73,15 @@ angular.module 'polygons', []
           @setPoints polygon
 
           if polygon.data.length > 1
-            @scope.orangeDot = 
-              x: @scope.c2x dot.p.0
+            @scope.orangeDot =
+              x: (@scope.c2xIso dot.p.1) dot.p.0
               y: @scope.r2y dot.p.1
             @scope.polyLast = true
 
           if polygon.data.length == 1
             @scope.polyFirst = true
-            @scope.greenDot = 
-              x: @scope.c2x dot.p.0
+            @scope.greenDot =
+              x: (@scope.c2xIso dot.p.1) dot.p.0
               y: @scope.r2y dot.p.1
 
       undraw: ->
@@ -97,12 +97,12 @@ angular.module 'polygons', []
             points = polygon.data
             if points.length > 0
               @scope.polyFirst = true
-              @scope.greenDot = 
-                x: @scope.c2x points.0.0
+              @scope.greenDot =
+                x: (@scope.c2xIso points.0.1) points.0.0
                 y: @scope.r2y points.0.1
               @scope.polyLast = true
-              @scope.orangeDot = 
-                x: @scope.c2x points[*-1].0
+              @scope.orangeDot =
+                x: (@scope.c2xIso points[*-1].1) points[*-1].0
                 y: @scope.r2y points[*-1].1
           else
             @polygons[*] = polygon
@@ -113,13 +113,13 @@ angular.module 'polygons', []
           @scope.polyLast = false
           if points.length > 0
             @scope.polyFirst = true
-            @scope.greenDot = 
-              x: @scope.c2x points.0.0
+            @scope.greenDot =
+              x: (@scope.c2xIso points.0.1) points.0.0
               y: @scope.r2y points.0.1
           if points.length > 1
             @scope.polyLast = true
-            @scope.orangeDot = 
-              x: @scope.c2x points[*-1].0
+            @scope.orangeDot =
+              x: (@scope.c2xIso points[*-1].1) points[*-1].0
               y: @scope.r2y points[*-1].1
           @polygons[*] = polygon
         @setPoints polygon

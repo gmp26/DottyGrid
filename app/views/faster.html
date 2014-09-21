@@ -1,5 +1,9 @@
 
 <div class="toolControls" >
+     <span>
+      <label for="iso">&#x2234;</label>
+      <input id="iso" type="checkbox" ng-model="iso" ng-change="reset()">
+    </span>
     <div class="btn-group"
       popover-placement="bottom" popover="Playback drawing" popover-trigger="mouseenter">
       <button
@@ -26,7 +30,7 @@
         ng-click="toolClick(tool)"
         ng-disabled="!tool.enabled()"><i class="fa fa-{{tool.icon}}"></i> {{tool.label}}</button>
     </div>
-    
+
     <a href="mailto:{{mailTo}}?subject={{mailSubject}}&amp;body={{mailBody()}}"
         class="btn btn-link btn-sm"
         popover-placement="bottom" popover="Share my drawing" popover-trigger="mouseenter"
@@ -45,7 +49,7 @@
         popover-placement="bottom" popover="Clear drawing" popover-trigger="mouseenter"
         ng-click="reset()"><i class="fa fa-bolt"></i> Clear</button>
     </button>
-    
+
     <a ng-href="{{getUrl()}}" target="_parent" class="btn btn-sm btn-info pull-right" ng-hide="fullScreen"><i class="fa fa-expand"></i> Full Screen</a>
 
     <a href="{{backLink}}" ng-show="fullScreen"
