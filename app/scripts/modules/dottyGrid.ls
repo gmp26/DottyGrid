@@ -89,6 +89,9 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
 
     app = $routeParams.app?.toString!toLowerCase!
     $scope.id = ~~$routeParams.id || 10791
+    $scope.iso = $routeParams.iso?
+    console.log "routeParams"
+    console.debug $routeParams
     $scope.backLink = "http://nrich.maths.org/#{$scope.id}"
     $scope.fullScreen = (app and app != "0" and app != "false") || !$routeParams.id?
 
@@ -240,8 +243,6 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
     # .domain [0,colCount-1]
     # .range [inset, colCount*sep]
 
-    $scope.iso = false
-
     oddy = d3.scale.linear!
              .domain [0,colCount-1]
              .range [inset + sep/2, colCount*sep + sep/2]
@@ -257,13 +258,6 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
     $scope.coordTransforms = ->
       $scope.c2xIso = (y) ->
         if $scope.iso && y && (y % 2 == 1) then oddy else eveny
-        # sep / 2 else 0
-        # d3.scale.linear!
-        #   .domain [0,colCount-1]
-        #   .range [inset + hsep, colCount*sep + hsep]
-
-      # $scope.x2c = $scope.c2x.invert
-      # $scope.x2C = (x) -> Math.round $scope.x2c x
 
       $scope.x2cIso = (y) ->
         r = Math.round($scope.y2r y)
@@ -341,14 +335,15 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
           return
 
     $scope.toString = ->
-      (for command in $scope.commands.stack
-        if command.params
-          plugin = command.thisObj
-          dot = command.params
-          "#{plugin.index}-#{dot.p.0}-#{dot.p.1}"
-        else
-          ''
-      ) * '!'
+      "iso=#{if $scope.iso then 1 else 0}/" ++ (
+        (for command in $scope.commands.stack
+          if command.params
+            plugin = command.thisObj
+            dot = command.params
+            "#{plugin.index}-#{dot.p.0}-#{dot.p.1}"
+          else
+            ''
+        ) * '!')
 
     $scope.getUrl = -> "http://nrich.maths.org/dottyGrid/\#/#{$scope.toString!}?app&id=#{$scope.id}"
 

@@ -7,13 +7,13 @@ angular.module 'DottyApp' <[ ngRoute ngTouch dottyGrid ui.bootstrap ]>
     .when '/', do
       templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
-    .when '/:cmds?/:app?', do
+    .when '/:iso?/:cmds?/:app?', do
       templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
-    .when '/:cmds?/:id?', do
+    .when '/:iso?/:cmds?/:id?', do
       templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
-    .when '/:cmds?/:app?&:id?', do
+    .when '/:iso?/:cmds?/:app?&:id?', do
       templateUrl: 'views/faster.html'
       controller: 'dottyGridController'
     .otherwise do
