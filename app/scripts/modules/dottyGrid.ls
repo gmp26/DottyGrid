@@ -1,6 +1,6 @@
 'use strict'
 
-{any, empty, filter, find, flatten, partition, reject, sort-by, tail} = require 'prelude-ls'
+{any, empty, filter, find, flatten, partition, reject, sort-by, tail, drop} = require 'prelude-ls'
 
 angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandStore]>
 
@@ -89,7 +89,12 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
 
     app = $routeParams.app?.toString!toLowerCase!
     $scope.id = ~~$routeParams.id || 10791
-    $scope.iso = $routeParams.iso?
+    if ($routeParams.cmds?.indexOf "iso-") == 0
+      $scope.iso = true
+      $routeParams.cmds = drop 4 $routeParams.cmds
+    else
+      $scope.iso = false
+
     console.log "routeParams"
     console.debug $routeParams
     $scope.backLink = "http://nrich.maths.org/#{$scope.id}"
@@ -166,7 +171,8 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
 
     installTools!
 
-    $scope.reset = ->
+    $scope.reset = (iso) ->
+      $scope.iso = iso
       console.log "clear all"
       $scope.coordTransforms!
       #$scope.commandStack = []
@@ -335,7 +341,7 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
           return
 
     $scope.toString = ->
-      "iso=#{if $scope.iso then 1 else 0}/" ++ (
+      "#{if $scope.iso then 'iso-' else ''}" ++ (
         (for command in $scope.commands.stack
           if command.params
             plugin = command.thisObj
