@@ -97,7 +97,10 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
 
     console.log "routeParams"
     console.debug $routeParams
-    $scope.backLink = "http://nrich.maths.org/#{$scope.id}"
+    # $scope.backLink = "http://nrich.maths.org/#{$scope.id}"
+
+    $scope.backLink = if (window.location != window.parent.location) then document.referrer else document.location
+
     $scope.fullScreen = (app and app != "0" and app != "false") || !$routeParams.id?
 
     $scope.fills = [
@@ -172,8 +175,10 @@ angular.module 'dottyGrid' <[orangeDots blueDots redDots lines polygons commandS
     installTools!
 
     $scope.reset = (iso) ->
-      $scope.iso = iso
-      console.log "clear all"
+      # change iso if explicitly selected
+      if arguments.length == 1
+        $scope.iso = iso
+
       $scope.coordTransforms!
       #$scope.commandStack = []
       installTools!
