@@ -398,9 +398,9 @@ module.exports = (grunt) ->
         configFile: 'karma.conf.js'
         singleRun: true
 
-    cdnify:
-      dist:
-        html: ['<%= yeoman.dist %>/*.html']
+##    cdnify:
+#      dist:
+#        html: ['<%= yeoman.dist %>/*.html']
 
     ngmin:
       dist:
@@ -464,7 +464,7 @@ module.exports = (grunt) ->
     'autoprefixer'
     'concat'
     'copy:dist'
-    'cdnify'
+#    'cdnify'
     'ngmin'
     'cssmin'
     'uglify'
